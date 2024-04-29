@@ -1,0 +1,9 @@
+{
+	"BaseID": "Melee_Knife",
+	"SubType": "Melee_Knife",
+	"ItemType": "Melee",
+	"Weight": 0.0,
+    "Damage": 24,
+    "DamageType": "Melee",
+    "UseTime": 0.5
+}

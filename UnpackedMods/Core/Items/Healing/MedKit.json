@@ -1,0 +1,12 @@
+{
+	"BaseID": "Healing_MedKit",
+	"SubType": "Healing_MedKit",
+	"ItemType": "Healing",
+	"Weight": 0.50,
+    "UseTime": 3,
+    "HealAmount": 25,
+    "SideEffect": 
+    [
+        
+    ]
+}

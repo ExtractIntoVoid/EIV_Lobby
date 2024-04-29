@@ -1,0 +1,9 @@
+{
+	"BaseID": "Ammo_919_AP",
+	"Damage": 20,
+	"DamageType": "Bullet",
+	"Speed": 0.5,
+	"Weight": 0.20,
+	"ItemType": "Ammo",
+	"SubType": "Ammo_919_AP"
+}

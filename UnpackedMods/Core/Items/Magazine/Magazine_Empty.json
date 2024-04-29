@@ -1,0 +1,11 @@
+{
+	"BaseID": "Magazine_Empty",
+	"SubType": "Magazine_Empty",
+	"ItemType": "Magazine",
+	"Weight": 0.0,
+    "MagSize": 0,
+    "AmmoSupport": 
+    [
+
+    ]
+}
