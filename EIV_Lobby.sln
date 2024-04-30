@@ -5,7 +5,11 @@ VisualStudioVersion = 17.9.34607.119
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LobbyConsole", "LobbyConsole\LobbyConsole.csproj", "{C47633D2-4D70-4591-AC47-891DB587EBF1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LobbyLib", "LobbyLib\LobbyLib.csproj", "{4E48779D-5CB1-4E34-865C-B278FE1BB9B5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LobbyLib", "LobbyLib\LobbyLib.csproj", "{4E48779D-5CB1-4E34-865C-B278FE1BB9B5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JsonLib", "JsonLib\JsonLib.csproj", "{66B76945-9CD7-45FC-BBC2-9DD7D7076D34}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JsonLib_Mod", "JsonLib_Mod\JsonLib_Mod.csproj", "{5C5C4EBB-C02E-4B08-9400-FB1DAA6107F6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +25,14 @@ Global
 		{4E48779D-5CB1-4E34-865C-B278FE1BB9B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4E48779D-5CB1-4E34-865C-B278FE1BB9B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4E48779D-5CB1-4E34-865C-B278FE1BB9B5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{66B76945-9CD7-45FC-BBC2-9DD7D7076D34}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{66B76945-9CD7-45FC-BBC2-9DD7D7076D34}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{66B76945-9CD7-45FC-BBC2-9DD7D7076D34}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{66B76945-9CD7-45FC-BBC2-9DD7D7076D34}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5C5C4EBB-C02E-4B08-9400-FB1DAA6107F6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5C5C4EBB-C02E-4B08-9400-FB1DAA6107F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5C5C4EBB-C02E-4B08-9400-FB1DAA6107F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5C5C4EBB-C02E-4B08-9400-FB1DAA6107F6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
