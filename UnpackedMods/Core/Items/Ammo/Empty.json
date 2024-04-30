@@ -1,9 +1,0 @@
-{
-	"BaseID": "Ammo_Empty",
-	"Damage": 0,
-	"DamageType": "Bullet",
-	"Speed": 0.0,
-	"Weight": 0.0,
-	"ItemType": "Ammo",
-	"SubType": "Ammo_Empty"
-}
