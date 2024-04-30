@@ -24,6 +24,7 @@ namespace JsonLib.Convert
                 {
                     new ItemConverter(),
                 },
+                NullValueHandling = NullValueHandling.Ignore,
             };
 
             foreach (var item in JsonLibConverters.ModdedConverters)

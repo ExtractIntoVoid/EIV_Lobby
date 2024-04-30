@@ -7,7 +7,6 @@ namespace JsonLib.DefaultItems
         public bool CanUse { get; set; }
         public float UseTime { get; set; }
         public string BaseID { get; set; } = string.Empty;
-        public string SubType { get; set; } = string.Empty;
         public string ItemType { get; set; } = nameof(IMelee);
         public decimal Weight { get; set; }
         public string AssetPath { get; set; } = string.Empty;
@@ -22,7 +21,7 @@ namespace JsonLib.DefaultItems
 
         public override string ToString()
         {
-            return $"{BaseID} {SubType} {ItemType} {Weight} {AssetPath}";
+            return $"{BaseID} {ItemType} {Weight} {AssetPath}";
         }
     }
 }

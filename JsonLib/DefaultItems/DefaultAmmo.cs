@@ -9,7 +9,6 @@ namespace JsonLib.DefaultItems
         public string DamageType { get; set; } = string.Empty;
         public float Speed { get; set; }
         public string BaseID { get; set; } = string.Empty;
-        public string SubType { get; set; } = string.Empty;
         public string ItemType { get; set; } = nameof(IAmmo);
         public decimal Weight { get; set; }
         public string AssetPath { get; set; } = string.Empty;
@@ -21,7 +20,7 @@ namespace JsonLib.DefaultItems
 
         public override string ToString()
         {
-            return $"{BaseID} {SubType} {ItemType} {Weight} {AssetPath} {Damage} {DamageType} {ArmorDamage} {Speed}";
+            return $"{BaseID} {ItemType} {Weight} {AssetPath} {Damage} {DamageType} {ArmorDamage} {Speed}";
         }
     }
 }

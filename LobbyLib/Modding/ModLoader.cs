@@ -1,4 +1,6 @@
-﻿using JsonLib.Modding;
+﻿using JsonLib.Convert;
+using JsonLib.Modding;
+using LobbyLib.ItemStuff;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,6 +32,7 @@ namespace LobbyLib.Modding
                     var ass = AppDomain.CurrentDomain.Load(File.ReadAllBytes(lobbyMod));
                     LoadJsonLibMod(ass);
                 }
+                LoadAssets(unpackedmods);
             }
 
         }
@@ -45,6 +48,20 @@ namespace LobbyLib.Modding
 
             Console.WriteLine("jsonLib converter added");
             JsonLib.JsonLibConverters.ModdedConverters.Add(jsonLib);
+        }
+
+        static void LoadAssets(string Dir)
+        {
+            foreach (var json in Directory.GetFiles(Path.Combine(Dir, "Assets", "Items"), "*.json", SearchOption.AllDirectories))
+            {
+                Console.WriteLine(json);
+                var item = ConvertHelper.ConvertFromString(File.ReadAllText(json));
+                if (item != null)
+                {
+                    ItemMaker.Items.Add(item.BaseID, item);
+                }
+                
+            }
         }
     }
 }

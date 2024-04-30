@@ -21,6 +21,11 @@ namespace JsonLib.Convert
             {
                 return item;
             }
+            if (jsonObject["ItemType"]!.ToString() == nameof(IItem))
+            {
+                return item;
+            }
+
             conv = JsonLibConverters.ModdedConverters.Where(x => x.GetJsonConverter(jsonObject["ItemType"]!.ToString()) != null).First().GetJsonConverter(jsonObject["ItemType"]!.ToString());
 
             if (conv != null)

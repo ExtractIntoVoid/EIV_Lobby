@@ -2,15 +2,18 @@
 
 namespace JsonLib.DefaultItems
 {
-    public class DefaultMagazine : IMagazine
+    public class DefaultRig : IRig
     {
-        public List<IAmmo> Ammunition { get; set; } = [];
-        public uint MagSize { get; set; }
-        public List<string> AmmoSupport { get; set; } = [];
         public string BaseID { get; set; } = string.Empty;
-        public string ItemType { get; set; } = nameof(IMagazine);
+        public string ItemType { get; set; } = nameof(IRig);
         public decimal Weight { get; set; }
         public string AssetPath { get; set; } = string.Empty;
+        public List<IItem> Items { get; set; } = [];
+        public IArmorPlate? PlateSlot { get; set; } 
+        public uint MaxItem { get; set; }
+        public List<string> ItemsAccepted { get; set; } = [];
+        public List<string> SpecificItemsAccepted { get; set; } = [];
+        public List<string> ArmorPlateAccepted { get; set; } = [];
 
         public object Clone()
         {

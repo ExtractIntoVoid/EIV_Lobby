@@ -33,6 +33,7 @@ namespace JsonLib.Modding
                 new MagazineConverter(),
                 new MeleeConverter(),
                 new ThrowableConverter(),
+                new StashConverter(),
             ];
         }
     }
