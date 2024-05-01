@@ -7,27 +7,26 @@ namespace LobbyLib.Jsons
     {
         [JsonIgnore]
         public Guid UserId { get; set; } //ID From UserDB Id
-        public List<IItem> PocketItems { get; set; } = [];
-        public string BackSlot { get; set; }
+        public List<IItem> PocketItem { get; set; } = [];
+        public string BackSlotId { get; set; }
         public IRig? RigSlot { get; set; }
-        public WeaponSlot PrimarySlot { get; set; }
-        public WeaponSlot SecondarySlot { get; set; }
-        public string? MeleeSlot { get; set; }
+        public WeaponSlot? PrimarySlot { get; set; }
+        public WeaponSlot? SecondarySlot { get; set; }
+        public IMelee? MeleeSlot { get; set; }
         public IItem? HoldingItem { get; set; }
 
 
         public class WeaponSlot
         {
-            public string Id { get; set; } //Gun Name
-            public string? MagazineId { get; set; } //Loaded Magazine if exists
-            public List<string> Ammos { get; set; } = new();
+            public IGun Gun { get; set; }
+            // attachment and stuff0
 
         }
 
 
         public override string ToString()
         {
-            return $"Items: {string.Join(", ", PocketItems)}, InvItem: {BackSlot}, HoldingItem: {HoldingItem}";
+            return $"Items: {string.Join(", ", PocketItem)}, BackSlotId: {BackSlotId}, HoldingItem: {HoldingItem}";
         }
     }
 }

@@ -12,6 +12,7 @@ namespace JsonLib.DefaultItems
         public string ItemType { get; set; } = nameof(IAmmo);
         public decimal Weight { get; set; }
         public string AssetPath { get; set; } = string.Empty;
+        public string BaseAmmoType { get; set; } = string.Empty;
 
         public object Clone()
         {

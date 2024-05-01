@@ -2,7 +2,6 @@
 using JsonLib.Items;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System;
 
 namespace JsonLib.Convert
 {
@@ -26,7 +25,13 @@ namespace JsonLib.Convert
                 return item;
             }
 
-            conv = JsonLibConverters.ModdedConverters.Where(x => x.GetJsonConverter(jsonObject["ItemType"]!.ToString()) != null).First().GetJsonConverter(jsonObject["ItemType"]!.ToString());
+            var modConverter = JsonLibConverters.ModdedConverters.Where(x => x.GetJsonConverter(jsonObject["ItemType"]!.ToString()) != null).FirstOrDefault();
+            if (modConverter == null)
+            {
+                throw new Exception($"ModdedConverters does not have a converter that the ItemType is: {jsonObject["ItemType"]!.ToString()}");
+            }
+
+            conv = modConverter.GetJsonConverter(jsonObject["ItemType"]!.ToString());
 
             if (conv != null)
             {

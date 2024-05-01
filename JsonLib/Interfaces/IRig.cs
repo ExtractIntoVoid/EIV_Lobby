@@ -4,10 +4,8 @@ namespace JsonLib.Interfaces;
 
 public interface IRig : IItem
 {
-    [JsonIgnore]
-    public List<IItem> Items { get; set; }
-    [JsonIgnore]
-    public IArmorPlate? PlateSlot { get; set; }
+    public List<string> ItemIds { get; set; }
+    public string? PlateSlotId { get; set; }
     public uint MaxItem { get; set; }
     public List<string> ItemsAccepted { get; set; }
 

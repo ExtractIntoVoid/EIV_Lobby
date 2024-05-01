@@ -10,12 +10,12 @@ namespace JsonLib.DefaultItems
         public string ItemType { get; set; } = nameof(IArmoredRig);
         public decimal Weight { get; set; }
         public string AssetPath { get; set; } = string.Empty;
-        public List<IItem> Items { get; set; } = [];
-        public IArmorPlate? PlateSlot { get; set; } 
         public uint MaxItem { get; set; }
         public List<string> ItemsAccepted { get; set; } = [];
         public List<string> SpecificItemsAccepted { get; set; } = [];
         public List<string> ArmorPlateAccepted { get; set; } = [];
+        public List<string> ItemIds { get; set; } = [];
+        public string? PlateSlotId { get; set; }
 
         public object Clone()
         {

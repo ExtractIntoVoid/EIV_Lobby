@@ -9,6 +9,7 @@ namespace JsonLib.DefaultItems
         public string ItemType { get; set; } = nameof(IGun);
         public decimal Weight { get; set; }
         public string AssetPath { get; set; } = string.Empty;
+        public IMagazine? Magazine { get; set; }
 
         public object Clone()
         {

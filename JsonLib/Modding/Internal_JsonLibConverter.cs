@@ -17,6 +17,9 @@ namespace JsonLib.Modding
                 "IMagazine" => new MagazineConverter(),
                 "IMelee" => new MeleeConverter(),
                 "IThrowable" => new ThrowableConverter(),
+                "IArmoredRig" => new ArmoredRigConverter(),
+                "IArmorPlate" => new ArmorPlateConverter(),
+                "IRig" => new RigConverter(),
                 _ => null,
             };
         }
@@ -34,6 +37,9 @@ namespace JsonLib.Modding
                 new MeleeConverter(),
                 new ThrowableConverter(),
                 new StashConverter(),
+                new ArmoredRigConverter(),
+                new ArmorPlateConverter(),
+                new RigConverter(),
             ];
         }
     }

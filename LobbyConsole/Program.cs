@@ -26,22 +26,27 @@ namespace LobbyConsole
 
             Inventory inventory = new Inventory()
             { 
-                HoldingItem = "Healing_MedKit",
-                BackSlot = "Backpack_64",
-                PocketItems = new(),
-                MeleeSlot = "Melee_Knife",
+                HoldingItem = ItemMaker.MakeNewItem("Healing_MedKit"),
+                BackSlotId = "Backpack_64",
+                PocketItem = new(),
+                MeleeSlot = ItemMaker.CreateItem<IMelee>("Melee_Knife"),
                 SecondarySlot = new()
                 { 
-                    Id = "Gun_Pistol",
-                    MagazineId = "Magazine_919",
-                    Ammos = new() 
-                    { 
-                        "Ammo_919", "Ammo_919","Ammo_919","Ammo_919", "Ammo_919_AP",
-                    }
+                    Gun = ItemMaker.CreateItem<IGun>("Gun_Pistol")
                 },
                 RigSlot = null,
                 UserId = id
             };
+
+            var rig = ItemMaker.CreateItem<IRig>("Rig_Small");
+            rig.PlateSlotId = "ArmorPlate_Lightweight";
+            inventory.RigSlot = rig;
+
+            Console.WriteLine("919: " + inventory.SecondarySlot.Gun.TryInsertMagazine("Magazine_919", "Ammo_919", 3));
+
+            Console.WriteLine("919 ap: " + inventory.SecondarySlot.Gun.Magazine.TryInsertAmmos("Ammo_919_AP", 2));
+
+            Console.WriteLine("556: " + inventory.SecondarySlot.Gun.Magazine.TryInsertAmmos("Ammo_556", 1));
 
             json.SaveInventory(inventory);
 

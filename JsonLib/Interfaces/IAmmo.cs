@@ -6,4 +6,9 @@ public interface IAmmo : IItem
     public uint ArmorDamage { get; set; }
     public string DamageType { get; set; }
     public float Speed { get; set; }
+
+    /// <summary>
+    /// This usually helps to mitigate issues when there is a subtype for an ammo.
+    /// </summary>
+    public string BaseAmmoType { get; set; }
 }

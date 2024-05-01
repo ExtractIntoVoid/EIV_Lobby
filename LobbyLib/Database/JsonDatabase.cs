@@ -32,7 +32,7 @@ namespace LobbyLib.Database
             { 
                 Formatting = Formatting.Indented,
                 NullValueHandling = NullValueHandling.Ignore,
-
+                MissingMemberHandling = MissingMemberHandling.Ignore
             }));
         }
 
