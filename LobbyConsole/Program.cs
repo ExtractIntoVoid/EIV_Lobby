@@ -19,6 +19,16 @@ namespace LobbyConsole
 
             ItemMaker.PrintBaseIds();
 
+            var x = JsonConvert.DeserializeObject<List<ItemRecreator>>(File.ReadAllText("DefaultItems.json"));
+
+            var items = ItemRemake.ItemRemaker(x);
+            Console.WriteLine("Items reconstructed!");
+            foreach (var item in items)
+            {
+                Console.WriteLine(item);
+            }
+            File.WriteAllText("reconst.json",JsonConvert.SerializeObject(items, Formatting.Indented));
+            /*
             JsonDatabase json = new();
 
             var id = Guid.NewGuid();
@@ -52,6 +62,7 @@ namespace LobbyConsole
 
             var inv = json.GetInventory(id);
             Console.WriteLine(inv);
+            */
         }
     }
 }

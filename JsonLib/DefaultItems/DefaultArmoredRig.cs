@@ -11,7 +11,7 @@ namespace JsonLib.DefaultItems
         public decimal Weight { get; set; }
         public string AssetPath { get; set; } = string.Empty;
         public uint MaxItem { get; set; }
-        public List<string> ItemsAccepted { get; set; } = [];
+        public List<string> ItemTypesAccepted { get; set; } = [];
         public List<string> SpecificItemsAccepted { get; set; } = [];
         public List<string> ArmorPlateAccepted { get; set; } = [];
         public List<string> ItemIds { get; set; } = [];

@@ -7,9 +7,9 @@ namespace LobbyLib.ItemStuff
         /// <summary>
         /// Checking if the AmmoType is compatible in with the Magazine
         /// </summary>
-        /// <param name="magazine"></param>
-        /// <param name="AmmoId"></param>
-        /// <returns></returns>
+        /// <param name="magazine">The Magazine</param>
+        /// <param name="AmmoId">BaseId of the Ammo</param>
+        /// <returns>False if AmmoId is not an IAmmo, and if AmmoSupport doesnt contains either the BaseId or the BaseAmmoType</returns>
         public static bool CheckAmmoCompatible(this IMagazine magazine, string AmmoId)
         {
             if (magazine == null)
