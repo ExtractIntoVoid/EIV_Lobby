@@ -13,7 +13,7 @@ namespace JsonLib.DefaultItems
         public uint Damage { get; set; }
         public uint ArmorDamage { get; set; }
         public string DamageType { get; set; } = string.Empty;
-
+        public List<string> Tags { get; set; } = [];
         public object Clone()
         {
             return this.MemberwiseClone();

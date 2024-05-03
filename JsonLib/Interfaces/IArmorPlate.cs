@@ -1,6 +1,6 @@
 ﻿namespace JsonLib.Interfaces;
 
-public interface IArmorPlate : IItem, IDurable
+public interface IArmorPlate : IDurable
 {
     public string Material { get; set; }
 }

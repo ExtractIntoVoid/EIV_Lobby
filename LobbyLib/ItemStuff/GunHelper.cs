@@ -8,7 +8,12 @@ namespace LobbyLib.ItemStuff
         {
             if (gun == null)
                 return false;
-            return gun.MagazineSupport.Contains(MagazineId);
+
+            var magazine = ItemMaker.CreateItem<IMagazine>(MagazineId);
+            if (magazine == null)
+                return false;
+
+            return gun.MagazineSupport.Contains(MagazineId) || gun.MagazineSupport.Intersect(magazine.Tags).Any();
         }
 
         public static bool TryCreateMagazine(this IGun gun, string MagazineId)

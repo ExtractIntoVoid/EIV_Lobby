@@ -50,7 +50,7 @@ namespace LobbyLib.Database
         public StashInventory? GetStashInventory(Guid Id)
         {
             Create();
-            var json = Path.Combine(dir_path, Id.ToString(), "StashInventory.json");
+            var json = Path.Combine(dir_path, Id.ToString().Replace("-", "_"), "StashInventory.json");
             if (!File.Exists(json))
                 return null;
             var settings = ConvertHelper.GetSerializerSettings();
@@ -60,9 +60,51 @@ namespace LobbyLib.Database
         public void SaveStashInventory(StashInventory inventory)
         {
             Create();
-            var json = Path.Combine(dir_path, inventory.UserId.ToString(), "StashInventory.json");
+            var json = Path.Combine(dir_path, inventory.UserId.ToString().Replace("-", "_"), "StashInventory.json");
             var settings = ConvertHelper.GetSerializerSettings();
             File.WriteAllText(json, JsonConvert.SerializeObject(inventory, settings));
+        }
+
+        public void DeleteInventory(Guid Id)
+        {
+            var json = Path.Combine(dir_path, Id.ToString().Replace("-", "_"), "Inventory.json");
+            if (File.Exists(json))
+                File.Delete(json);
+        }
+
+        public void DeleteStashInventory(Guid Id)
+        {
+            var json = Path.Combine(dir_path, Id.ToString().Replace("-", "_"), "StashInventory.json");
+            if (File.Exists(json))
+                File.Delete(json);
+        }
+
+
+        public void AddChat(ChatMessage chat)
+        {
+            var messages = GetChats(chat.ReceiverId);
+            messages.Add(chat);
+            var json = Path.Combine(dir_path, chat.ReceiverId.ToString().Replace("@","_"), "ChatMessages.json");
+            File.WriteAllText(json, JsonConvert.SerializeObject(messages));
+        }
+
+        public List<ChatMessage> GetChats(string ReceiverId)
+        {
+            var json = Path.Combine(dir_path, ReceiverId.ToString().Replace("@", "_"), "ChatMessages.json");
+            return JsonConvert.DeserializeObject<List<ChatMessage>>(File.ReadAllText(json)) ?? new();
+        }
+
+        public ChatMessage? GetChat(string ReceiverId, ulong MessageId)
+        {
+            var messages = GetChats(ReceiverId);
+            return messages.Where(x => x.Id == MessageId).FirstOrDefault();
+        }
+
+        public void DeleteChat(string ReceiverId)
+        {
+            var json = Path.Combine(dir_path, ReceiverId.ToString().Replace("@", "_"), "StashInventory.json");
+            if (File.Exists(json))
+                File.Delete(json);
         }
     }
 }

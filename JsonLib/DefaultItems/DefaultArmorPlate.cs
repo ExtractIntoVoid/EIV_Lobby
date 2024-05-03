@@ -12,6 +12,7 @@ namespace JsonLib.DefaultItems
         public string AssetPath { get; set; } = string.Empty;
         public string Material { get; set; } = string.Empty;
         public uint Durability { get; set; }
+        public List<string> Tags { get; set; } = [];
 
         public object Clone()
         {

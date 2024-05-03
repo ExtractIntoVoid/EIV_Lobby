@@ -9,7 +9,7 @@ namespace LobbyLib.ItemStuff
         /// </summary>
         /// <param name="magazine">The Magazine</param>
         /// <param name="AmmoId">BaseId of the Ammo</param>
-        /// <returns>False if AmmoId is not an IAmmo, and if AmmoSupport doesnt contains either the BaseId or the BaseAmmoType</returns>
+        /// <returns>False if AmmoId is not an IAmmo, and if SupportedAmmo doesnt contains either the BaseId or the Tags</returns>
         public static bool CheckAmmoCompatible(this IMagazine magazine, string AmmoId)
         {
             if (magazine == null)
@@ -17,7 +17,7 @@ namespace LobbyLib.ItemStuff
             var ammo = ItemMaker.CreateItem<IAmmo>(AmmoId);
             if (ammo == null)
                 return false;
-            return magazine.AmmoSupport.Contains(AmmoId) || magazine.AmmoSupport.Contains(ammo.BaseAmmoType);
+            return magazine.SupportedAmmo.Contains(AmmoId) || magazine.SupportedAmmo.Intersect(ammo.Tags).Any();
         }
 
         /// <summary>

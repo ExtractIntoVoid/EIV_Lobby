@@ -10,7 +10,7 @@ namespace JsonLib.DefaultItems
         public string ItemType { get; set; } = nameof(IArmor);
         public decimal Weight { get; set; }
         public string AssetPath { get; set; } = string.Empty;
-
+        public List<string> Tags { get; set; } = [];
         public object Clone()
         {
             return this.MemberwiseClone();

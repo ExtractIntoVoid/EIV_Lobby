@@ -1,6 +1,6 @@
 ﻿namespace JsonLib.Interfaces;
 
-public interface IDamageDealer
+public interface IDamageDealer : IItem
 {
     public uint Damage { get; set; }
     public uint ArmorDamage { get; set; }

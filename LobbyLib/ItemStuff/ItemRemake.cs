@@ -2,6 +2,7 @@
 using JsonLib.Interfaces;
 using LobbyLib.Jsons;
 using ModdableWebServer;
+using System.ComponentModel;
 
 namespace LobbyLib.ItemStuff
 {
@@ -30,11 +31,17 @@ namespace LobbyLib.ItemStuff
             if (item == null)
                 return null;
 
+            if (item is IDurable durable && durable != null)
+            {
+                durable.Durability -= itemRecreator.Damaged;
+            }
+
             foreach (var contaied in itemRecreator.Contained)
             {
                 var remadeItem = ItemRemaker(contaied);
                 if (remadeItem == null)
                     continue;
+
                 switch (item.ItemType)
                 {
                     case nameof(IMagazine):
@@ -62,11 +69,11 @@ namespace LobbyLib.ItemStuff
                             var rig = (IRig)item;
                             if (contaied.Slot == "PlateSlot")
                             {
-                                rig.PlateSlotId = contaied.ItemBaseID;
+                                rig.TrySetArmorPlate(contaied.ItemBaseID);
                             }
-                            if (contaied.Slot == "PlateSlot")
+                            if (contaied.Slot == "ItemsSlot")
                             {
-                                rig. = contaied.ItemBaseID;
+                                rig.TryAddItem(contaied.ItemBaseID);
                             }
                             item = rig;
                         }

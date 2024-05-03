@@ -14,7 +14,7 @@ namespace JsonLib.DefaultItems
         public List<string> ArmorPlateAccepted { get; set; } = [];
         public List<string> ItemIds { get; set; } = [];
         public string? PlateSlotId { get; set; }
-
+        public List<string> Tags { get; set; } = [];
         public object Clone()
         {
             return this.MemberwiseClone();
