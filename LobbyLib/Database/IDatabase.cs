@@ -10,11 +10,15 @@ namespace LobbyLib.Database
 
         public void Close();
 
+        // Inventory
+
         public void SaveInventory(Inventory inventory);
 
         public Inventory? GetInventory(Guid Id);
 
         public void DeleteInventory(Guid Id);
+
+        // Stash
 
         public void SaveStashInventory(StashInventory inventory);
 
@@ -22,7 +26,8 @@ namespace LobbyLib.Database
 
         public void DeleteStashInventory(Guid Id);
 
-        // Other Database operation I guess
+        // Chat
+
         public void AddChat(ChatMessage chat);
 
         public ChatMessage? GetChat(string ReceiverId, ulong MessageId);
@@ -30,5 +35,13 @@ namespace LobbyLib.Database
         public List<ChatMessage> GetChats(string ReceiverId);
 
         public void DeleteChat(string ReceiverId);
+
+        // User Data
+
+        public void SaveUserData(UserData userData);
+
+        public UserData? GetUserData(string UserId);
+
+        public void DeleteUserData(string UserId);
     }
 }
