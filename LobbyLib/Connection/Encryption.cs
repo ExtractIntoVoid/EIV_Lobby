@@ -16,18 +16,21 @@ namespace LobbyLib.Connection
             return Convert.ToHexString(serverkey.Encrypt(Encoding.UTF8.GetBytes(message), RSAEncryptionPadding.Pkcs1));
         }
 
-        public void CreateServerKey()
+        public static void CreateServerKey()
         {
             var rsa = RSA.Create(1024);
             ConfigIni.Write("EncKey", "RSAKey" , rsa.ToXmlString(true));
         }
 
-        public RSA GetServerKey()
+        public static RSA GetServerKey()
         {
             var rsa = RSA.Create(1024);
             string xml = ConfigIni.Read("EncKey", "RSAKey");
             if (string.IsNullOrEmpty(xml))
+            {
+                ConfigIni.Write("EncKey", "RSAKey", rsa.ToXmlString(true));
                 return rsa;
+            }
             rsa.FromXmlString(xml);
             return rsa;
         }

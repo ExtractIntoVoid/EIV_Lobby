@@ -2,13 +2,7 @@
 using ModdableWebServer.Helper;
 using ModdableWebServer.Servers;
 using NetCoreServer;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace LobbyLib.Web
 {
@@ -160,6 +154,8 @@ namespace LobbyLib.Web
             }
         }
 
+        /*
+         * We refuse to do overriding routes!
         public static void OverrideRoutes(Assembly assembly)
         {
             if (IsSsl && WSS_Server != null)
@@ -173,5 +169,6 @@ namespace LobbyLib.Web
                 WS_Server.HTTP_AttributeToMethods.Override(assembly);
             }
         }
+        */
     }
 }

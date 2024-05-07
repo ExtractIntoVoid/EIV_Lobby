@@ -1,4 +1,7 @@
-﻿using LobbyLib.Web;
+﻿using LobbyLib.Database;
+using LobbyLib.INI;
+using LobbyLib.Modding;
+using LobbyLib.Web;
 using System.Diagnostics;
 
 namespace LobbyLib
@@ -8,6 +11,7 @@ namespace LobbyLib
         public static bool IsAlreadyQuited = false;
         public static string IP = "https://127.0.0.1:7777";
         public static string ip_port = "127.0.0.1:7777";
+        public static IDatabase Database;
 
         /// <summary>
         /// Init the Server by Parameters
@@ -15,7 +19,7 @@ namespace LobbyLib
         /// <param name="Ip">Server IP</param>
         /// <param name="port">Server Port</param>
         /// <param name="LoadPlugin">Can Load Plugins</param>
-        public static void InitAll(string Ip, int port, bool ssl = false)
+        public static bool InitAll(string Ip, int port, bool ssl = false)
         {
             var sw = Stopwatch.StartNew();
             if (ssl)
@@ -32,6 +36,40 @@ namespace LobbyLib
                 ip_port = $"{Ip}:{port}";
             }
             ServerManager.Start(Ip, port, ssl);
+            // DatabaseType
+            var databaseType = ConfigIni.Read("Database", "DatabaseType");
+            if (!int.TryParse(databaseType, out int db_Type))
+            {
+                return false;
+            }
+            switch (db_Type)
+            {
+                case 0:
+                    Database = new JsonDatabase();
+                    break;
+                case 1:
+                    Database = new LiteDB_Database();
+                    break;
+                case 2:
+                    Database = new MySQL_Database();
+                    break;
+                default:
+                    break;
+            }
+            Database.Create();
+
+            // modding
+            var enable_mods = ConfigIni.Read("Mod", "EnableMods");
+            if (!int.TryParse(enable_mods, out int i_enable_mods))
+            {
+                return false;
+            }
+            if (i_enable_mods == 1)
+            {
+                ModLoader.LoadMods();
+            }
+
+            return true;
         }
 
         /// <summary>

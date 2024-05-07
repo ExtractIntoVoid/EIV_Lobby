@@ -1,4 +1,5 @@
-﻿namespace JsonLib_Mod.Internal
+﻿
+namespace JsonLib_Mod.Internal
 {
     public class BasicHelmet : IHelmet
     {
@@ -8,6 +9,7 @@
         public string ItemType { get; set; } = string.Empty;
         public decimal Weight { get; set; }
         public string AssetPath { get; set; } = string.Empty;
+        public List<string> Tags { get; set; } = [];
 
         public object Clone()
         {

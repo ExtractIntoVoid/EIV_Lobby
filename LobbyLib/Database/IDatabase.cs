@@ -43,5 +43,13 @@ namespace LobbyLib.Database
         public UserData? GetUserData(string UserId);
 
         public void DeleteUserData(string UserId);
+
+        // Badges
+
+        public void SaveBadge(Badge badge);
+
+        public Badge? GetBadge(string UserId);
+
+        public void DeleteBadge(string UserId);
     }
 }

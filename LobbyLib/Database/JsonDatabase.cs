@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 
 namespace LobbyLib.Database
 {
-    public class JsonDatabase : IDatabase
+    internal class JsonDatabase : IDatabase
     {
         public string dir_path = Path.Combine(Directory.GetCurrentDirectory(), "Database", "JsonDatabase");
         public void Create()
@@ -105,6 +105,36 @@ namespace LobbyLib.Database
             var json = Path.Combine(dir_path, ReceiverId.ToString().Replace("@", "_"), "StashInventory.json");
             if (File.Exists(json))
                 File.Delete(json);
+        }
+
+        public void SaveUserData(UserData userData)
+        {
+            throw new NotImplementedException();
+        }
+
+        public UserData? GetUserData(string UserId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void DeleteUserData(string UserId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SaveBadge(Badge badge)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Badge? GetBadge(string UserId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void DeleteBadge(string UserId)
+        {
+            throw new NotImplementedException();
         }
     }
 }
