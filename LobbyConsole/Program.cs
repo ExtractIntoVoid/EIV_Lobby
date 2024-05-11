@@ -16,7 +16,7 @@ namespace LobbyConsole
         static void Main(string[] args)
         {
             Console.WriteLine("Hello, World!");
-            Test(CompressionType.Deflate);
+            CompressCore();
             /*
             Test(CompressionType.None);
             Console.WriteLine("\n");
@@ -78,6 +78,23 @@ namespace LobbyConsole
             Console.WriteLine("GetFileData last: " + stopwatch.ToString());
             File.WriteAllBytes("Core.JsonLib.Lobby.dll_new", filedata);
             data.Close();
+        }
+
+
+        static void CompressCore()
+        {
+            var data = DatapackCreator.Create($"Core.eivp");
+            var writer = data.GetWriter()!;
+            writer.OnFileAdded += Writer_OnFileAdded;
+            writer.AddDirectory(Path.Combine("UnpackedMods", "Core"), true);
+            writer.OnFileAdded -= Writer_OnFileAdded;
+            writer.Save();
+            writer.Close();
+        }
+
+        private static void Writer_OnFileAdded(string Filename)
+        {
+            Console.WriteLine(Filename);
         }
     }
 }

@@ -53,7 +53,7 @@ namespace LobbyLib.Modding
 
         static void LoadPackedMods(string currdir)
         {
-
+            if (!Directory.Exists(Path.Combine(currdir, "Mods"))) { Directory.CreateDirectory(Path.Combine(currdir, "Mods")); }
         }
 
         static void LoadUnpackedMods(string currdir)
@@ -76,7 +76,7 @@ namespace LobbyLib.Modding
                     if (IsLobbyModEnabled)
                         LoadLobbyMod(ass);
                 }
-                LoadAssets(unpackedmods);
+                LoadAssets_Unpack(unpackedmods);
             }
         }
 
@@ -108,7 +108,7 @@ namespace LobbyLib.Modding
             Mods.Add(assembly.FullName, jsonLib);
         }
 
-        static void LoadAssets(string Dir)
+        static void LoadAssets_Unpack(string Dir)
         {
             foreach (var json in Directory.GetFiles(Path.Combine(Dir, "Assets", "Items"), "*.json", SearchOption.AllDirectories))
             {
