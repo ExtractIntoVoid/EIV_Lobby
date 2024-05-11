@@ -1,0 +1,3 @@
+[submodule "EIV_DataPack"]
+	path = EIV_DataPack
+	url = https://github.com/ExtractIntoVoid/EIV_DataPack.git
