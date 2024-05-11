@@ -3,6 +3,7 @@ using JsonLib.Modding;
 using LobbyLib.INI;
 using LobbyLib.ItemStuff;
 using System.Reflection;
+using EIV_DataPack;
 
 namespace LobbyLib.Modding
 {
@@ -54,6 +55,31 @@ namespace LobbyLib.Modding
         static void LoadPackedMods(string currdir)
         {
             if (!Directory.Exists(Path.Combine(currdir, "Mods"))) { Directory.CreateDirectory(Path.Combine(currdir, "Mods")); }
+
+            foreach (var packedmods in Directory.GetFiles("Mods"))
+            {
+                var creator = DatapackCreator.Read(packedmods);
+                var reader = creator.GetReader()!;
+                reader.ReadFileNames();
+
+                var deps = reader.Pack.FileNames.FindAll(x => x.Contains(".dll") && x.Contains("Dependencies"));
+                foreach (var item in deps)
+                {
+                    Console.WriteLine(item);
+                    AppDomain.CurrentDomain.Load(reader.GetFileData(item));
+                }
+                var lobbyMods = reader.Pack.FileNames.FindAll(x=> x.Contains(".LobbyMod.dll"));
+                foreach (var item in lobbyMods)
+                {
+                    Console.WriteLine(item);
+                    var ass = AppDomain.CurrentDomain.Load(reader.GetFileData(item));
+                    LoadJsonLibMod(ass);
+                    if (IsLobbyModEnabled)
+                        LoadLobbyMod(ass);
+                }
+                LoadAssets_Pack(reader, packedmods);
+                creator.Close();
+            }
         }
 
         static void LoadUnpackedMods(string currdir)
@@ -119,6 +145,21 @@ namespace LobbyLib.Modding
                     JsonMods.Add(Dir, item.BaseID);
                 }
                 
+            }
+        }
+
+        static void LoadAssets_Pack(DataPackReader reader, string filename)
+        {
+            var items = reader.Pack.FileNames.FindAll(x=>x.Contains(".json") && x.Contains(Path.Combine("Assets", "Items")));
+
+            foreach (var item in items)
+            {
+                var real_item = ConvertHelper.ConvertFromString(System.Text.Encoding.UTF8.GetString(reader.GetFileData(item)));
+                if (real_item != null)
+                {
+                    ItemMaker.Items.Add(real_item.BaseID, real_item);
+                    JsonMods.Add(filename, real_item.BaseID);
+                }
             }
         }
     }

@@ -17,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\EIV_DataPack\EIV_DataPack.csproj" />
     <ProjectReference Include="..\JsonLib\JsonLib.csproj" />
   </ItemGroup>
 
