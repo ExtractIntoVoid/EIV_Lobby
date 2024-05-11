@@ -8,6 +8,7 @@ using LobbyLib.Modding;
 using Newtonsoft.Json;
 using EIV_DataPack;
 using System.Diagnostics;
+using LobbyLib;
 
 namespace LobbyConsole
 {
@@ -16,68 +17,27 @@ namespace LobbyConsole
         static void Main(string[] args)
         {
             Console.WriteLine("Hello, World!");
-            CompressCore();
-            /*
-            Test(CompressionType.None);
-            Console.WriteLine("\n");
-            Thread.Sleep(10);
-            Test(CompressionType.Deflate);
-            Console.WriteLine("\n");
-            Thread.Sleep(10);
-            Test(CompressionType.GZip);
-            Console.WriteLine("\n");
-            Thread.Sleep(10);
-            Test(CompressionType.ZLib);
-            Console.WriteLine("\n");
-            Thread.Sleep(10);
-            Test(CompressionType.Brotli);
-            Console.WriteLine("\n");
-            Thread.Sleep(10);
-            */
-        }
-
-        static void Test(CompressionType compressionType)
-        {
-            Console.WriteLine("Compression Type: " + compressionType);
-            Stopwatch stopwatch = new();
-            stopwatch.Start();
-            var data = DatapackCreator.Create($"test_{compressionType.ToString()}.eivp", compressionType);
-            stopwatch.Stop();
-            Console.WriteLine("Creating Time: " + stopwatch.ToString());
-            stopwatch.Restart();
-            stopwatch.Start();
-            var writer = data.GetWriter();
-            writer.AddDirectory("UnpackedMods", true);
-            stopwatch.Stop();
-            Console.WriteLine("Adding dir Time: " + stopwatch.ToString());
-            stopwatch.Restart();
-            stopwatch.Start();
-            writer.Save();
-
-            writer.AddDirectory("test", true);
-            writer.Save();
-
-            stopwatch.Stop();
-            Console.WriteLine("Save Time: " + stopwatch.ToString());
-            stopwatch.Restart();
-            data.Close();
-            data = DatapackCreator.Read($"test_{compressionType.ToString()}.eivp");
-            var reader = data.GetReader();
-            Console.WriteLine("Filenames: " + reader.FileNameCount);
-            stopwatch.Start();
-            var filedata = reader.GetFileData(reader.FileNameCount - 1);
-            stopwatch.Stop();
-            Console.WriteLine("GetFileData No Reading Time: " + stopwatch.ToString());
-            File.WriteAllBytes("last_filedata.txt", filedata);
-            stopwatch.Start();
-            reader.ReadFileNames();
-            File.WriteAllText($"Files_{compressionType.ToString()}.txt", string.Join("\n", reader.Pack.FileNames));
-            Console.WriteLine("ReadFileNames: " + stopwatch.ToString());
-            filedata = reader.GetFileData("Core\\Core.JsonLib.Lobby.dll");
-            stopwatch.Stop();
-            Console.WriteLine("GetFileData last: " + stopwatch.ToString());
-            File.WriteAllBytes("Core.JsonLib.Lobby.dll_new", filedata);
-            data.Close();
+            //CompressCore();
+            //return;
+            Console.WriteLine(MainControl.InitAll("0.0.0.0", 6969));
+            foreach (var item in ModLoader.Mods.Keys)
+            {
+                Console.WriteLine(item);
+            }
+            foreach (var item in ModLoader.JsonMods.Keys)
+            {
+                Console.WriteLine(item);
+            }
+            string ret = "ret";
+            while (ret != "q")
+            {
+                ret = Console.ReadLine().ToLower();
+                if (ret == "test")
+                {
+                    
+                }
+            }
+            MainControl.Stop();
         }
 
 

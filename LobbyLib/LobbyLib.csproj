@@ -21,4 +21,19 @@
     <ProjectReference Include="..\JsonLib\JsonLib.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="LobbyLib_Res.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>LobbyLib_Res.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="LobbyLib_Res.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>LobbyLib_Res.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
 </Project>

@@ -36,6 +36,13 @@ namespace LobbyLib
                 ip_port = $"{Ip}:{port}";
             }
             ServerManager.Start(Ip, port, ssl);
+
+            // ini check
+            if (!File.Exists("Config.ini"))
+            {
+                File.WriteAllText("Config.ini", LobbyLib_Res.Config);
+            }
+
             // DatabaseType
             var databaseType = ConfigIni.Read("Database", "DatabaseType");
             if (!int.TryParse(databaseType, out int db_Type))

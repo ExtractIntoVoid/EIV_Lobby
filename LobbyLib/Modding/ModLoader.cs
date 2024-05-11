@@ -4,17 +4,30 @@ using LobbyLib.INI;
 using LobbyLib.ItemStuff;
 using System.Reflection;
 using EIV_DataPack;
+using ModdableWebServer;
+using JsonLib.Interfaces;
+using System.Linq;
 
 namespace LobbyLib.Modding
 {
     public class ModLoader
     {
         public static Dictionary<string, ILobbyMod> Mods = new();
-        public static Dictionary<string, string> JsonMods = new();
+        public static Dictionary<string, List<string>> JsonMods = new();
         static bool IsLobbyModEnabled = true;
 
         public static void LoadMods()
         {
+            var EnableLobbyMods = ConfigIni.Read("Mod", "EnableLobbyMods");
+            if (!int.TryParse(EnableLobbyMods, out int i_EnableLobbyMods))
+            {
+                return;
+            }
+            if (i_EnableLobbyMods == 0)
+            {
+                IsLobbyModEnabled = false;
+            }
+
             string currdir = Directory.GetCurrentDirectory();
             LoadPackedMods(currdir);
             var EnableLoadUnpackingMods = ConfigIni.Read("Mod", "EnableLoadUnpackingMods");
@@ -25,17 +38,7 @@ namespace LobbyLib.Modding
             if (i_EnableLoadUnpackingMods == 1)
             {
                 LoadUnpackedMods(currdir);
-            }
-
-            var EnableLobbyMods = ConfigIni.Read("Mod", "EnableLobbyMods");
-            if (!int.TryParse(EnableLobbyMods, out int i_EnableLobbyMods))
-            {
-                return;
-            }
-            if (i_EnableLobbyMods == 0)
-            {
-                IsLobbyModEnabled = false;
-            }
+            }      
         }
 
         public static void UnloadMods()
@@ -44,10 +47,8 @@ namespace LobbyLib.Modding
             {
                 item.Value.ShutDown();
             }
-            foreach (var item in JsonMods)
-            {
-                ItemMaker.Items.Remove(item.Value);
-            }
+            JsonMods.Clear();
+            ItemMaker.Items.Clear();
         }
 
 
@@ -61,17 +62,15 @@ namespace LobbyLib.Modding
                 var creator = DatapackCreator.Read(packedmods);
                 var reader = creator.GetReader()!;
                 reader.ReadFileNames();
-
-                var deps = reader.Pack.FileNames.FindAll(x => x.Contains(".dll") && x.Contains("Dependencies"));
+                //reader.Pack.FileNames.ForEach(Console.WriteLine);
+                var deps = reader.Pack.FileNames.Where(x => x.Contains(".dll") && x.Contains("Dependencies"));
                 foreach (var item in deps)
                 {
-                    Console.WriteLine(item);
                     AppDomain.CurrentDomain.Load(reader.GetFileData(item));
                 }
-                var lobbyMods = reader.Pack.FileNames.FindAll(x=> x.Contains(".LobbyMod.dll"));
+                var lobbyMods = reader.Pack.FileNames.Where(x => x.Contains(".LobbyMod.dll"));
                 foreach (var item in lobbyMods)
                 {
-                    Console.WriteLine(item);
                     var ass = AppDomain.CurrentDomain.Load(reader.GetFileData(item));
                     LoadJsonLibMod(ass);
                     if (IsLobbyModEnabled)
@@ -88,15 +87,12 @@ namespace LobbyLib.Modding
 
             foreach (var unpackedmods in Directory.GetDirectories("UnpackedMods"))
             {
-                Console.WriteLine(unpackedmods);
                 foreach (var unpacked_dependency in Directory.GetFiles(Path.Combine(unpackedmods, "Dependencies"), "*.dll"))
                 {
-                    Console.WriteLine(unpacked_dependency);
                     AppDomain.CurrentDomain.Load(unpacked_dependency);
                 }
                 foreach (var LobbyMod in Directory.GetFiles(unpackedmods, "*.LobbyMod.dll"))
                 {
-                    Console.WriteLine(LobbyMod);
                     var ass = AppDomain.CurrentDomain.Load(File.ReadAllBytes(LobbyMod));
                     LoadJsonLibMod(ass);
                     if (IsLobbyModEnabled)
@@ -115,7 +111,7 @@ namespace LobbyLib.Modding
             if (jsonLib == null)
                 return;
 
-            Console.WriteLine("jsonLib converter added");
+            //Console.WriteLine("jsonLib converter added");
             JsonLib.JsonLibConverters.ModdedConverters.Add(jsonLib);
         }
 
@@ -141,24 +137,36 @@ namespace LobbyLib.Modding
                 var item = ConvertHelper.ConvertFromString(File.ReadAllText(json));
                 if (item != null)
                 {
-                    ItemMaker.Items.Add(item.BaseID, item);
-                    JsonMods.Add(Dir, item.BaseID);
-                }
-                
+                    bool ret = ItemMaker.Items.TryAdd(item.BaseID, item);
+                    if (!ret)
+                        continue;
+                    if (JsonMods.ContainsKey(Dir))
+                    {
+                        JsonMods[Dir].Add(item.BaseID);
+                        continue;
+                    }
+                    JsonMods.Add(Dir, new() { item.BaseID });
+                }  
             }
         }
 
         static void LoadAssets_Pack(DataPackReader reader, string filename)
         {
-            var items = reader.Pack.FileNames.FindAll(x=>x.Contains(".json") && x.Contains(Path.Combine("Assets", "Items")));
-
+            var items = reader.Pack.FileNames.Where(x=>x.Contains(".json") && x.Contains("Assets/Items"));
             foreach (var item in items)
             {
                 var real_item = ConvertHelper.ConvertFromString(System.Text.Encoding.UTF8.GetString(reader.GetFileData(item)));
                 if (real_item != null)
                 {
-                    ItemMaker.Items.Add(real_item.BaseID, real_item);
-                    JsonMods.Add(filename, real_item.BaseID);
+                    bool ret = ItemMaker.Items.TryAdd(real_item.BaseID, real_item);
+                    if (!ret)
+                        continue;
+                    if (JsonMods.ContainsKey(filename))
+                    {
+                        JsonMods[filename].Add(real_item.BaseID);
+                        continue;
+                    }
+                    JsonMods.Add(filename, new() { real_item.BaseID });
                 }
             }
         }
