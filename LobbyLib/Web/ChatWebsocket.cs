@@ -3,6 +3,8 @@ using ModdableWebServer;
 using System.Diagnostics;
 using System.Text;
 using Newtonsoft.Json.Linq;
+using ModdableWebServer.Helper;
+using System.Security.Cryptography;
 
 namespace LobbyLib.Web
 {
@@ -11,8 +13,41 @@ namespace LobbyLib.Web
         [WS("/Socket/Chat")]
         public static void WSControl(WebSocketStruct socketStruct)
         {
-            var jwt = socketStruct.Request.Headers["authorization"];
+            if (!socketStruct.Request.Headers.TryGetValue("authorization", out var jwt))
+            {
+                socketStruct.SendWebSocketClose(401, "authorization is not found!");
+                return;
+            }
+
+            if (JWT.JWTHelper.Validate(jwt))
+            {
+                socketStruct.SendWebSocketClose(401, "JWT is invalid!");
+                return;
+            }
+
+            var body = socketStruct.Request.Body; // body must be the RSA public key when joining!
+            if (body.Contains("RSAKeyValue") && body.Contains("RSAKeyValue") && body.Contains("Modulus") && body.Contains("Exponent") && !body.Contains("<P>"))
+            {
+                try
+                {
+                    RSA rsatest = RSA.Create();
+                    rsatest.FromXmlString(body);
+                }
+                catch (Exception)
+                {
+                    socketStruct.SendWebSocketClose(401, "Your Body is not contains wrong RSA Public Key!");
+                    return;
+                }
+                
+            }
+            else
+            {
+                socketStruct.SendWebSocketClose(401, "Your Body is not contains your RSA Public Key!");
+                return;
+            }
+
             Console.WriteLine("websocket hit!");
+
 
             if (socketStruct.WSRequest != null)
             {
