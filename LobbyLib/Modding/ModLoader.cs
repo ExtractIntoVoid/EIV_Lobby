@@ -7,6 +7,7 @@ using EIV_DataPack;
 using ModdableWebServer;
 using JsonLib.Interfaces;
 using System.Linq;
+using LobbyLib.Web;
 
 namespace LobbyLib.Modding
 {
@@ -14,6 +15,7 @@ namespace LobbyLib.Modding
     {
         public static Dictionary<string, ILobbyMod> Mods = new();
         public static Dictionary<string, List<string>> JsonMods = new();
+        public static Dictionary<string, List<string>> ModsFiles = new();
         static bool IsLobbyModEnabled = true;
 
         public static void LoadMods()
@@ -59,11 +61,14 @@ namespace LobbyLib.Modding
 
             foreach (var packedmods in Directory.GetFiles("Mods"))
             {
+                if (packedmods.Contains(".disabled"))
+                    continue;
                 var creator = DatapackCreator.Read(packedmods);
                 var reader = creator.GetReader()!;
                 reader.ReadFileNames();
+                ModsFiles.Add(packedmods.Replace("Mods" + Path.DirectorySeparatorChar, ""), reader.Pack.FileNames);
                 //reader.Pack.FileNames.ForEach(Console.WriteLine);
-                var deps = reader.Pack.FileNames.Where(x => x.Contains(".dll") && x.Contains("Dependencies"));
+                var deps = reader.Pack.FileNames.Where(x => x.Contains(".dll") && x.Contains("LobbyDependencies"));
                 foreach (var item in deps)
                 {
                     AppDomain.CurrentDomain.Load(reader.GetFileData(item));
@@ -87,9 +92,16 @@ namespace LobbyLib.Modding
 
             foreach (var unpackedmods in Directory.GetDirectories("UnpackedMods"))
             {
-                foreach (var unpacked_dependency in Directory.GetFiles(Path.Combine(unpackedmods, "Dependencies"), "*.dll"))
+                if (unpackedmods.Contains(".disabled"))
+                    continue;
+
+                ModsFiles.Add(unpackedmods.Replace("UnpackedMods" + Path.DirectorySeparatorChar, "") + ".unpacked", Directory.GetFiles(unpackedmods, "*", SearchOption.AllDirectories).ToList());
+                if (Directory.Exists(Path.Combine(unpackedmods, "LobbyDependencies")))
                 {
-                    AppDomain.CurrentDomain.Load(unpacked_dependency);
+                    foreach (var unpacked_dependency in Directory.GetFiles(Path.Combine(unpackedmods, "LobbyDependencies"), "*.dll"))
+                    {
+                        AppDomain.CurrentDomain.Load(unpacked_dependency);
+                    }
                 }
                 foreach (var LobbyMod in Directory.GetFiles(unpackedmods, "*.LobbyMod.dll"))
                 {
@@ -132,6 +144,9 @@ namespace LobbyLib.Modding
 
         static void LoadAssets_Unpack(string Dir)
         {
+            if (!Directory.Exists(Path.Combine(Dir, "Assets", "Items")))
+                return;
+
             foreach (var json in Directory.GetFiles(Path.Combine(Dir, "Assets", "Items"), "*.json", SearchOption.AllDirectories))
             {
                 var item = ConvertHelper.ConvertFromString(File.ReadAllText(json));
