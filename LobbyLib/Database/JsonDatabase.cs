@@ -1,5 +1,5 @@
 ﻿using LobbyLib.Jsons;
-using JsonLib.Convert;
+using EIV_JsonLib.Convert;
 using Newtonsoft.Json;
 
 namespace LobbyLib.Database
@@ -118,21 +118,6 @@ namespace LobbyLib.Database
         }
 
         public void DeleteUserData(string UserId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void SaveBadge(Badge badge)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Badge? GetBadge(string UserId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void DeleteBadge(string UserId)
         {
             throw new NotImplementedException();
         }

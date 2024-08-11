@@ -1,4 +1,4 @@
-﻿using JsonLib.Interfaces;
+﻿using EIV_JsonLib.Interfaces;
 using Newtonsoft.Json;
 
 namespace LobbyLib.Jsons

@@ -5,6 +5,7 @@ using ModdableWebServer.Helper;
 using Newtonsoft.Json;
 using LobbyLib.Jsons;
 using LobbyLib.JWT;
+using EIV_Common.InfoJSON;
 
 namespace LobbyLib.Web
 {
@@ -25,7 +26,7 @@ namespace LobbyLib.Web
         [HTTP("POST", "/EIV_Lobby/DirectConnect")]
         public static bool DirectConnect(HttpRequest request, ServerStruct serverStruct)
         {
-            var userinfo = JsonConvert.DeserializeObject<UserInfoJson_JWT>(request.Body);
+            var userinfo = JsonConvert.DeserializeObject<UserInfoJSON>(request.Body);
             if (userinfo == null)
             {
                 serverStruct.Response.MakeErrorResponse("UserInfoJson_JWT cannot parse");
@@ -46,20 +47,8 @@ namespace LobbyLib.Web
                 MainControl.Database.SaveUserData(data);
             }
 
-            if (userinfo.AdditionalData is Badge badgedata && badgedata != null)
-            {
-                var jwt = JWTHelper.Create(data, badgedata);
-                serverStruct.Response.MakeGetResponse(jwt);
-                serverStruct.SendResponse();
-                return true;
-            }
-            string JWT = string.Empty;
-            var badge = MainControl.Database.GetBadge(userinfo.CreateUserId());
-            if (badge == null)
-                JWT = JWTHelper.Create(data);
-            else
-                JWT = JWTHelper.Create(data, badge);
-            serverStruct.Response.MakeGetResponse(JWT);
+            var jwt = JWTHelper.Create(data);
+            serverStruct.Response.MakeGetResponse(jwt);
             serverStruct.SendResponse();
             return true;
         }

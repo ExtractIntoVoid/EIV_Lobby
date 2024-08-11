@@ -49,11 +49,6 @@ namespace LobbyLib.Database
             throw new NotImplementedException();
         }
 
-        public Badge? GetBadge(string UserId)
-        {
-            throw new NotImplementedException();
-        }
-
         public ChatMessage? GetChat(string ReceiverId, ulong MessageId)
         {
             throw new NotImplementedException();
@@ -80,11 +75,6 @@ namespace LobbyLib.Database
         }
 
         public void Open()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void SaveBadge(Badge badge)
         {
             throw new NotImplementedException();
         }

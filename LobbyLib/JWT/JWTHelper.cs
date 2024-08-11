@@ -2,7 +2,6 @@
 using JWT.Builder;
 using JWT.Exceptions;
 using LobbyLib.Connection;
-using LobbyLib.INI;
 using LobbyLib.Jsons;
 using System.Security.Cryptography;
 
@@ -34,29 +33,6 @@ namespace LobbyLib.JWT
             .WithAlgorithm(new RS256Algorithm(rsa, rsa))
             .AddClaim("uid", userData.UserId)
             .AddClaim("name", userData.Name)
-            .AddClaim<Badge>("badge", new()
-            { 
-                ColorHex = ConfigIni.Read("Badges", "DefaultColor"),
-                PlayerId = userData.UserId,
-                Title = ConfigIni.Read("Badges", "DefaultTitle"),
-            })
-            .ExpirationTime(now.AddHours(1))
-            .IssuedAt(now)
-            .Issuer("EIV_Lobby")
-            .Encode();
-
-            return token;
-        }
-
-        public static string Create(UserData userData, Badge badge)
-        {
-            var now = DateTime.Now;
-            RSA rsa = Encryption.GetServerKey();
-            var token = JwtBuilder.Create()
-            .WithAlgorithm(new RS256Algorithm(rsa, rsa))
-            .AddClaim("uid", userData.UserId)
-            .AddClaim("name", userData.Name)
-            .AddClaim<Badge>("badge", badge)
             .ExpirationTime(now.AddHours(1))
             .IssuedAt(now)
             .Issuer("EIV_Lobby")
@@ -101,11 +77,14 @@ namespace LobbyLib.JWT
 
         public static bool ValidateMasterServerToken(string token)
         {
-            RSA rsa = Encryption.GetServerKey();
+            // get url form masterServer
+            RSA rsa = RSA.Create();
+            //rsa.ImportRSAPublicKey([], out _);
             try
             {
                 var json = JwtBuilder.Create()
-                                     .Decode(token);
+                    .WithAlgorithm(new RS256Algorithm(rsa))
+                    .Decode(token);
             }
             catch (TokenNotYetValidException)
             {

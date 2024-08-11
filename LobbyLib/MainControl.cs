@@ -1,5 +1,5 @@
-﻿using LobbyLib.Database;
-using LobbyLib.INI;
+﻿using EIV_Common;
+using LobbyLib.Database;
 using LobbyLib.Modding;
 using LobbyLib.Web;
 using System.Diagnostics;
@@ -44,7 +44,7 @@ namespace LobbyLib
             }
 
             // DatabaseType
-            var databaseType = ConfigIni.Read("Database", "DatabaseType");
+            var databaseType = ConfigINI.Read("Config.ini","Database", "DatabaseType");
             if (!int.TryParse(databaseType, out int db_Type))
             {
                 return false;
@@ -66,7 +66,7 @@ namespace LobbyLib
             Database.Create();
 
             // modding
-            var enable_mods = ConfigIni.Read("Mod", "EnableMods");
+            var enable_mods = ConfigINI.Read("Config.ini", "Mod", "EnableMods");
             if (!int.TryParse(enable_mods, out int i_enable_mods))
             {
                 return false;

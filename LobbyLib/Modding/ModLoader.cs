@@ -1,13 +1,10 @@
-﻿using JsonLib.Convert;
-using JsonLib.Modding;
-using LobbyLib.INI;
-using LobbyLib.ItemStuff;
-using System.Reflection;
+﻿using System.Reflection;
 using EIV_DataPack;
-using ModdableWebServer;
-using JsonLib.Interfaces;
-using System.Linq;
-using LobbyLib.Web;
+using EIV_JsonLib.Modding;
+using EIV_JsonLib;
+using EIV_JsonLib.Convert;
+using EIV_Common;
+using EIV_Common.JsonStuff;
 
 namespace LobbyLib.Modding
 {
@@ -20,7 +17,7 @@ namespace LobbyLib.Modding
 
         public static void LoadMods()
         {
-            var EnableLobbyMods = ConfigIni.Read("Mod", "EnableLobbyMods");
+            var EnableLobbyMods = ConfigINI.Read("Config.ini","Mod", "EnableLobbyMods");
             if (!int.TryParse(EnableLobbyMods, out int i_EnableLobbyMods))
             {
                 return;
@@ -32,7 +29,7 @@ namespace LobbyLib.Modding
 
             string currdir = Directory.GetCurrentDirectory();
             LoadPackedMods(currdir);
-            var EnableLoadUnpackingMods = ConfigIni.Read("Mod", "EnableLoadUnpackingMods");
+            var EnableLoadUnpackingMods = ConfigINI.Read("Config.ini", "Mod", "EnableLoadUnpackingMods");
             if (!int.TryParse(EnableLoadUnpackingMods, out int i_EnableLoadUnpackingMods))
             {
                 return;
@@ -50,7 +47,7 @@ namespace LobbyLib.Modding
                 item.Value.ShutDown();
             }
             JsonMods.Clear();
-            ItemMaker.Items.Clear();
+            Storage.Items.Clear();
         }
 
 
@@ -124,7 +121,7 @@ namespace LobbyLib.Modding
                 return;
 
             //Console.WriteLine("jsonLib converter added");
-            JsonLib.JsonLibConverters.ModdedConverters.Add(jsonLib);
+            JsonLibConverters.ModdedConverters.Add(jsonLib);
         }
 
         static void LoadLobbyMod(Assembly assembly)
@@ -152,7 +149,7 @@ namespace LobbyLib.Modding
                 var item = ConvertHelper.ConvertFromString(File.ReadAllText(json));
                 if (item != null)
                 {
-                    bool ret = ItemMaker.Items.TryAdd(item.BaseID, item);
+                    bool ret = Storage.Items.TryAdd(item.BaseID, item);
                     if (!ret)
                         continue;
                     if (JsonMods.ContainsKey(Dir))
@@ -173,7 +170,7 @@ namespace LobbyLib.Modding
                 var real_item = ConvertHelper.ConvertFromString(System.Text.Encoding.UTF8.GetString(reader.GetFileData(item)));
                 if (real_item != null)
                 {
-                    bool ret = ItemMaker.Items.TryAdd(real_item.BaseID, real_item);
+                    bool ret = Storage.Items.TryAdd(real_item.BaseID, real_item);
                     if (!ret)
                         continue;
                     if (JsonMods.ContainsKey(filename))
