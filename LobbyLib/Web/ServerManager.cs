@@ -13,6 +13,7 @@ namespace LobbyLib.Web
         public static string IP = "127.0.0.1:7777";
         static WSS_Server? WSS_Server = null;
         static WS_Server? WS_Server = null;
+        static ServerUds.LobbyUdsServer? ServerUds = null;
         static bool IsSsl = true;
         static Dictionary<string, Dictionary<HTTPAttribute, MethodInfo>> HTTP_Plugins = new();
         static Dictionary<string, Dictionary<string, MethodInfo>> WS_Plugins = new();
@@ -57,6 +58,8 @@ namespace LobbyLib.Web
             IpPort_WS = ssl ? $"wss://{ip}:{port}/socket/" : $"ws://{ip}:{port}/socket/";
             IP = $"{ip}:{port}";
             Console.WriteLine("Server started on " + IpPort + " | " + IpPort_WS);
+            ServerUds = new(Path.Combine(Path.GetTempPath(), "chat.sock"));
+            ServerUds.Start();
         }
 
         public static void Failed(object? sender, HttpRequest request)
@@ -76,6 +79,11 @@ namespace LobbyLib.Web
             {
                 WSS_Server.Stop();
                 WSS_Server = null;
+            }
+            if (ServerUds != null)
+            {
+                ServerUds.Stop();
+                ServerUds = null;
             }
             Console.WriteLine("Server stopped.");
         }

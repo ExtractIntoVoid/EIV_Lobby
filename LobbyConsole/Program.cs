@@ -1,14 +1,8 @@
-﻿using JsonLib;
-using JsonLib.Convert;
-using JsonLib.Interfaces;
-using LobbyLib.Database;
-using LobbyLib.ItemStuff;
-using LobbyLib.Jsons;
-using LobbyLib.Modding;
-using Newtonsoft.Json;
-using EIV_DataPack;
-using System.Diagnostics;
+﻿using EIV_Common.JsonStuff;
+using EIV_JsonLib.Classes;
 using LobbyLib;
+using LobbyLib.Web;
+using NetCoreServer;
 
 namespace LobbyConsole
 {
@@ -16,115 +10,67 @@ namespace LobbyConsole
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello, World!");
-            //CompressCore();
-            //return;
             Console.WriteLine(MainControl.InitAll("0.0.0.0", 6969));
-            foreach (var item in ModLoader.Mods.Keys)
-            {
-                Console.WriteLine(item);
-            }
-            foreach (var item in ModLoader.JsonMods.Keys)
-            {
-                Console.WriteLine(item);
-            }
             string ret = "ret";
             while (ret != "q")
             {
                 ret = Console.ReadLine().ToLower();
                 if (ret == "test")
                 {
-                    
+                    ServerUds.LobbyUdsClient chatClient = new(Path.Combine(Path.GetTempPath(), "chat.sock"));
+                    chatClient.Connect();
+                    Console.WriteLine("Press Enter to stop the client or '!' to reconnect the client...");
+
+                    // Perform text input
+                    for (; ; )
+                    {
+                        string line = Console.ReadLine();
+                        if (string.IsNullOrEmpty(line))
+                            break;
+
+                        // Disconnect the client
+                        if (line == "!")
+                        {
+                            Console.Write("Client disconnecting...");
+                            chatClient.DisconnectAsync();
+                            Console.WriteLine("Done!");
+                            continue;
+                        }
+
+                        // Send the entered text to the chat server
+                        chatClient.SendAsync(line);
+                    }
+
+                    // Disconnect the client
+                    Console.Write("Client disconnecting...");
+                    chatClient.DisconnectAndStop();
+                    Console.WriteLine("Done!");
                 }
             }
             MainControl.Stop();
         }
 
-
-        static void CompressCore()
+        static void x()
         {
-            var data = DatapackCreator.Create($"Core.eivp");
-            var writer = data.GetWriter()!;
-            writer.OnFileAdded += Writer_OnFileAdded;
-            writer.AddDirectory(Path.Combine("UnpackedMods", "Core"), true);
-            writer.OnFileAdded -= Writer_OnFileAdded;
-            writer.Save();
-            writer.Close();
-        }
+            var itemRecreators = new List<ItemRecreator>
+            {
+                new("Backpack_32"),
+                new("Armor_Medium"),
+                new("ArmoredRig_Medium", 1, [new("ArmorPlate_Lightweight")]),
+                new("Melee_Knife"),
+                new("Throwable_Flashbang", 2),
+                new("Consumable_FoodCan", 4)
+            };
 
-        private static void Writer_OnFileAdded(string Filename)
-        {
-            Console.WriteLine(Filename);
+            itemRecreators[2].Contained.AddToItemsSlot([("Medkit",2)]);
+
+            var mag = new ItemRecreator("Magazine_919");
+            mag.Contained.AddToAmmosSlot([("Ammo_919", 34)]);
+
+            itemRecreators[2].Contained.Add(mag);
+            itemRecreators[2].Contained.Add(mag);
+
+
         }
     }
 }
-
-/*
- 
- 
- 
- 
- 
- 
- 
-            var eivp = "eivp"u8.ToArray();
-            int MagicInt = 1886808421;
-
-            Console.WriteLine(BitConverter.ToString(eivp));
-            Console.WriteLine(Convert.ToHexString(eivp));
-            Console.WriteLine(BitConverter.ToInt32(eivp));
-            Console.WriteLine(MagicInt);
-            return;
-
-            ModLoader.LoadMods();
-
-            ItemMaker.PrintBaseIds();
-
-            var x = JsonConvert.DeserializeObject<List<ItemRecreator>>(File.ReadAllText("DefaultItems.json"));
-
-            var items = ItemRemake.ItemRemaker(x);
-            Console.WriteLine("Items reconstructed!");
-            foreach (var item in items)
-            {
-                Console.WriteLine(item);
-            }
-            File.WriteAllText("reconst.json",JsonConvert.SerializeObject(items, Formatting.Indented));
- 
- 
- 
- */
-/*
-           JsonDatabase json = new();
-
-           var id = Guid.NewGuid();
-           Console.WriteLine("id!" + id);
-
-           Inventory inventory = new Inventory()
-           { 
-               HoldingItem = ItemMaker.MakeNewItem("Healing_MedKit"),
-               BackSlotId = "Backpack_64",
-               PocketItem = new(),
-               MeleeSlot = ItemMaker.CreateItem<IMelee>("Melee_Knife"),
-               SecondarySlot = new()
-               { 
-                   Gun = ItemMaker.CreateItem<IGun>("Gun_Pistol")
-               },
-               RigSlot = null,
-               UserId = id
-           };
-
-           var rig = ItemMaker.CreateItem<IRig>("Rig_Small");
-           rig.PlateSlotId = "ArmorPlate_Lightweight";
-           inventory.RigSlot = rig;
-
-           Console.WriteLine("919: " + inventory.SecondarySlot.Gun.TryInsertMagazine("Magazine_919", "Ammo_919", 3));
-
-           Console.WriteLine("919 ap: " + inventory.SecondarySlot.Gun.Magazine.TryInsertAmmos("Ammo_919_AP", 2));
-
-           Console.WriteLine("556: " + inventory.SecondarySlot.Gun.Magazine.TryInsertAmmos("Ammo_556", 1));
-
-           json.SaveInventory(inventory);
-
-           var inv = json.GetInventory(id);
-           Console.WriteLine(inv);
-           */
