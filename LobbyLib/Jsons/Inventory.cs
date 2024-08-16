@@ -1,4 +1,5 @@
-﻿using EIV_JsonLib.Interfaces;
+﻿using EIV_Common.Inventory;
+using EIV_JsonLib.Interfaces;
 using Newtonsoft.Json;
 
 namespace LobbyLib.Jsons
@@ -9,19 +10,11 @@ namespace LobbyLib.Jsons
         public Guid UserId { get; set; } //ID From UserDB Id
         public List<IItem> PocketItem { get; set; } = [];
         public string BackSlotId { get; set; }
-        public IRig? RigSlot { get; set; }
-        public WeaponSlot? PrimarySlot { get; set; }
-        public WeaponSlot? SecondarySlot { get; set; }
-        public IMelee? MeleeSlot { get; set; }
+        public ISlot<IRig>? RigSlot { get; set; }
+        public GunSlot? PrimarySlot { get; set; }
+        public GunSlot? SecondarySlot { get; set; }
+        public ISlot<IMelee>? MeleeSlot { get; set; }
         public IItem? HoldingItem { get; set; }
-
-
-        public class WeaponSlot
-        {
-            public IGun Gun { get; set; }
-            // attachment and stuff0
-
-        }
 
 
         public override string ToString()

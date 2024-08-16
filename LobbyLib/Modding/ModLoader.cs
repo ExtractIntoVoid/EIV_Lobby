@@ -10,9 +10,9 @@ namespace LobbyLib.Modding
 {
     public class ModLoader
     {
-        public static Dictionary<string, ILobbyMod> Mods = new();
-        public static Dictionary<string, List<string>> JsonMods = new();
-        public static Dictionary<string, List<string>> ModsFiles = new();
+        public static Dictionary<string, ILobbyMod> Mods = [];
+        public static Dictionary<string, List<string>> JsonMods = [];
+        public static Dictionary<string, List<string>> ModsFiles = [];
         static bool IsLobbyModEnabled = true;
 
         public static void LoadMods()

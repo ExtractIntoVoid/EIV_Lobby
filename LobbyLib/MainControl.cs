@@ -14,13 +14,19 @@ namespace LobbyLib
         public static IDatabase Database;
 
         /// <summary>
-        /// Init the Server by Parameters
+        /// Init the Server
         /// </summary>
-        /// <param name="Ip">Server IP</param>
-        /// <param name="port">Server Port</param>
-        /// <param name="LoadPlugin">Can Load Plugins</param>
-        public static bool InitAll(string Ip, int port, bool ssl = false)
+        public static bool InitAll()
         {
+            // ini check
+            if (!File.Exists("Config.ini"))
+            {
+                File.WriteAllText("Config.ini", LobbyLib_Res.Config);
+            }
+
+            bool ssl = ConfigINI.Read<bool>("Config.ini", "Lobby", "SSL");
+            string Ip = ConfigINI.Read("Config.ini", "Lobby", "ServerAddress");
+            ushort port = ConfigINI.Read<ushort>("Config.ini", "Lobby", "ServerPort");
             var sw = Stopwatch.StartNew();
             if (ssl)
             {
@@ -36,12 +42,6 @@ namespace LobbyLib
                 ip_port = $"{Ip}:{port}";
             }
             ServerManager.Start(Ip, port, ssl);
-
-            // ini check
-            if (!File.Exists("Config.ini"))
-            {
-                File.WriteAllText("Config.ini", LobbyLib_Res.Config);
-            }
 
             // DatabaseType
             var databaseType = ConfigINI.Read("Config.ini","Database", "DatabaseType");
@@ -86,6 +86,7 @@ namespace LobbyLib
         {
             if (IsAlreadyQuited)
                 return;
+            ModLoader.UnloadMods();
             ServerManager.Stop();
             IsAlreadyQuited = true;
         }

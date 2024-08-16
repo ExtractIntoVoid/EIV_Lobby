@@ -1,7 +1,7 @@
-﻿using JWT.Algorithms;
+﻿using EIV_Common;
+using JWT.Algorithms;
 using JWT.Builder;
 using JWT.Exceptions;
-using LobbyLib.Connection;
 using LobbyLib.Jsons;
 using System.Security.Cryptography;
 
@@ -16,7 +16,7 @@ namespace LobbyLib.JWT
         /// <returns>JSON String</returns>
         public static string GetJWTJson(string token)
         {
-            RSA rsa = Encryption.GetServerKey();
+            RSA rsa = JWTHandler.GetRSA();
             var json = JwtBuilder.Create()
                                  .WithAlgorithm(new RS256Algorithm(rsa, rsa))
                                  .Decode(token);
@@ -28,7 +28,7 @@ namespace LobbyLib.JWT
         public static string Create(UserData userData)
         {
             var now = DateTime.Now;
-            RSA rsa = Encryption.GetServerKey();
+            RSA rsa = JWTHandler.GetRSA();
             var token = JwtBuilder.Create()
             .WithAlgorithm(new RS256Algorithm(rsa, rsa))
             .AddClaim("uid", userData.UserId)
@@ -49,7 +49,7 @@ namespace LobbyLib.JWT
         /// <returns>True | False</returns>
         public static bool Validate(string token)
         {
-            RSA rsa = Encryption.GetServerKey();
+            RSA rsa = JWTHandler.GetRSA();
             try
             {
                 var json = JwtBuilder.Create()
