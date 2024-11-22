@@ -5,10 +5,6 @@ public class ChatMessage
     public const int MAX_MESSAGE_LEN = 200;
 
     /// <summary>
-    /// Message Id
-    /// </summary>
-    public required ulong Id;
-    /// <summary>
     /// UserId of the Sender
     /// </summary>
     public required string SenderId;

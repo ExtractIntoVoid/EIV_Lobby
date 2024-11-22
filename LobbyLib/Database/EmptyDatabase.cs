@@ -2,11 +2,11 @@
 
 namespace LobbyLib.Database;
 
-internal class LiteDB_Database : IDatabase
+internal class EmptyDatabase : IDatabase
 {
     public void Close()
     {
-        
+
     }
 
     public void Create()
@@ -28,6 +28,7 @@ internal class LiteDB_Database : IDatabase
     {
         
     }
+
     public Inventory? GetInventory(Guid Id)
     {
         return null;

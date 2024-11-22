@@ -10,8 +10,9 @@ About - About this Lobby Server.
 Socket/Chat - Websocket for chat
 Socket/Client/{GUID} - Websocket for mostly that doesnt need HTTP (Matchmake, friend system?, groups)
 
-Profile/Inventory/{Action} - Item manipulation, Trader stuff and the likes
-Profile/Inventory - Get our inventory
+Profile/Inventory/{Action} - Item manipulation. (Mainly Stash Moving, and onto a character)
+Profile/Inventory - Get our charcter inventory
+Profile/Stash - Get our stash inventory
 
 Files/Client/Mods/{Modpath}
 Files/Server/Mods/{Modpath}

@@ -1,8 +1,7 @@
-﻿namespace LobbyLib.Modding
+﻿namespace LobbyLib.Modding;
+
+public interface ILobbyMod
 {
-    public interface ILobbyMod
-    {
-        public void Initialize();
-        public void ShutDown();
-    }
+    public void Initialize();
+    public void ShutDown();
 }

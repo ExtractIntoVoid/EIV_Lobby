@@ -1,12 +1,18 @@
 ﻿using EIV_JsonLib.Interfaces;
 using Newtonsoft.Json;
 
-namespace LobbyLib.Jsons
+namespace LobbyLib.Jsons;
+
+public class StashInventory
 {
-    public class StashInventory
-    {
-        [JsonIgnore]
-        public Guid UserId { get; set; } //ID From UserDB Id
-        public required IStash Stash { get; set; }
-    }
+    /// <summary>
+    /// ID from UserDB
+    /// </summary>
+    [JsonIgnore]
+    public Guid UserId { get; set; }
+
+    /// <summary>
+    /// Only Compress and send Stash!
+    /// </summary>
+    public required IStash Stash { get; set; }
 }
