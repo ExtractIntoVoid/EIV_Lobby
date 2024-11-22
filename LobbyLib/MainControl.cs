@@ -12,6 +12,7 @@ namespace LobbyLib
         public static string IP = "https://127.0.0.1:7777";
         public static string ip_port = "127.0.0.1:7777";
         public static IDatabase Database;
+        static Process? GameServerProcess;
 
         /// <summary>
         /// Init the Server
@@ -33,7 +34,6 @@ namespace LobbyLib
                 string _ip_port = $"https://{Ip}:{port}";
                 IP = _ip_port;
                 ip_port = $"{Ip}:{port}";
-                //CertHelper.Make(IPAddress.Parse(Ip), _ip_port);
             }
             else
             {
@@ -61,7 +61,7 @@ namespace LobbyLib
                     Database = new MySQL_Database();
                     break;
                 default:
-                    break;
+                    return false;
             }
             Database.Create();
 
@@ -76,6 +76,17 @@ namespace LobbyLib
                 ModLoader.LoadMods();
             }
 
+            //start game server(s)
+            bool CanLaunchGameServer = ConfigINI.Read<bool>("Config.ini", "GameServer", "CanLaunchGameServer");
+            string ServerPath = ConfigINI.Read("Config.ini", "GameServer", "ServerPath");
+            if (CanLaunchGameServer && !string.IsNullOrEmpty(ServerPath))
+            {
+                Process.EnterDebugMode();
+                GameServerProcess = Process.Start(new ProcessStartInfo()
+                { 
+                    FileName = ServerPath,
+                });
+            }
             return true;
         }
 
@@ -86,6 +97,10 @@ namespace LobbyLib
         {
             if (IsAlreadyQuited)
                 return;
+            GameServerProcess?.Kill();
+            GameServerProcess?.Close();
+            GameServerProcess?.Dispose();
+            GameServerProcess = null;
             ModLoader.UnloadMods();
             ServerManager.Stop();
             IsAlreadyQuited = true;

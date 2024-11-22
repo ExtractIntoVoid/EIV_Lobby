@@ -5,52 +5,50 @@ using ModdableWebServer.Helper;
 using Newtonsoft.Json;
 using LobbyLib.Jsons;
 using LobbyLib.JWT;
-using EIV_Common.InfoJSON;
+using EIV_Common.InfoJson;
 
-namespace LobbyLib.Web
+namespace LobbyLib.Web;
+
+internal class Connections
 {
-    internal class Connections
+    // this use if we connect with MasterServer
+    [HTTP("POST", "/EIV_Lobby/Connect")]
+    public static bool Connect(HttpRequest request, ServerStruct serverStruct)
     {
-        // this use if we connect with MasterServer
-        [HTTP("POST", "/EIV_Lobby/Connect")]
-        public static bool Connect(HttpRequest request, ServerStruct serverStruct)
-        {
-            
+        // JWT Decode?
 
-            serverStruct.Response.MakeGetResponse("");
+        serverStruct.Response.MakeGetResponse("");
+        serverStruct.SendResponse();
+        return true;
+    }
+
+    // Direct connection, not used with masterserver
+    [HTTP("POST", "/EIV_Lobby/DirectConnect")]
+    public static bool DirectConnect(HttpRequest request, ServerStruct serverStruct)
+    {
+        var userinfo = JsonConvert.DeserializeObject<UserInfoJson>(request.Body);
+        if (userinfo == null)
+        {
+            serverStruct.Response.MakeErrorResponse("UserInfoJson_JWT cannot parse");
             serverStruct.SendResponse();
             return true;
         }
 
-        // Direct connection, not used with masterserver
-        [HTTP("POST", "/EIV_Lobby/DirectConnect")]
-        public static bool DirectConnect(HttpRequest request, ServerStruct serverStruct)
+        var data = MainControl.Database.GetUserData(userinfo.CreateUserId());
+        if (data == null)
         {
-            var userinfo = JsonConvert.DeserializeObject<UserInfoJSON>(request.Body);
-            if (userinfo == null)
+            data = new()
             {
-                serverStruct.Response.MakeErrorResponse("UserInfoJson_JWT cannot parse");
-                serverStruct.SendResponse();
-                return true;
-            }
-
-            var data = MainControl.Database.GetUserData(userinfo.CreateUserId());
-            if (data == null)
-            {
-                data = new()
-                {
-                    UserId = userinfo.CreateUserId(),
-                    Name = userinfo.Name,
-                    FriendsIds = new(),
-                    RSA_PubKey_XML = string.Empty
-                };
-                MainControl.Database.SaveUserData(data);
-            }
-
-            var jwt = JWTHelper.Create(data);
-            serverStruct.Response.MakeGetResponse(jwt);
-            serverStruct.SendResponse();
-            return true;
+                UserId = userinfo.CreateUserId(),
+                Name = userinfo.Name,
+                FriendsIds = new(),
+                RSA_PubKey_XML = string.Empty
+            };
+            MainControl.Database.SaveUserData(data);
         }
+
+        serverStruct.Response.MakeGetResponse(JWTHelper.Create(data));
+        serverStruct.SendResponse();
+        return true;
     }
 }

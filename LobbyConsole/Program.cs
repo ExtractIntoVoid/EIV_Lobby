@@ -1,7 +1,7 @@
 ﻿using EIV_Common.JsonStuff;
 using EIV_JsonLib.Classes;
 using LobbyLib;
-using LobbyLib.Web;
+using LobbyLib.GameSocket;
 using NetCoreServer;
 
 namespace LobbyConsole
@@ -10,7 +10,7 @@ namespace LobbyConsole
     {
         static void Main(string[] args)
         {
-            Console.WriteLine(MainControl.InitAll("0.0.0.0", 6969));
+            Console.WriteLine(MainControl.InitAll());
             string ret = "ret";
             while (ret != "q")
             {
@@ -43,7 +43,7 @@ namespace LobbyConsole
 
                     // Disconnect the client
                     Console.Write("Client disconnecting...");
-                    chatClient.DisconnectAndStop();
+                    chatClient.Disconnect();
                     Console.WriteLine("Done!");
                 }
             }
@@ -62,10 +62,10 @@ namespace LobbyConsole
                 new("Consumable_FoodCan", 4)
             };
 
-            itemRecreators[2].Contained.AddToItemsSlot([("Medkit",2)]);
+            itemRecreators[2].Contained.AddToSlot([("Medkit",2)], AcceptedSlots.ItemsSlot);
 
             var mag = new ItemRecreator("Magazine_919");
-            mag.Contained.AddToAmmosSlot([("Ammo_919", 34)]);
+            mag.Contained.AddToSlot([("Ammo_919", 34)], AcceptedSlots.AmmoSlot);
 
             itemRecreators[2].Contained.Add(mag);
             itemRecreators[2].Contained.Add(mag);

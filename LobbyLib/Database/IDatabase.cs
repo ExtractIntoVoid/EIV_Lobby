@@ -26,16 +26,6 @@ namespace LobbyLib.Database
 
         public void DeleteStashInventory(Guid Id);
 
-        // Chat
-
-        public void AddChat(ChatMessage chat);
-
-        public ChatMessage? GetChat(string ReceiverId, ulong MessageId);
-
-        public List<ChatMessage> GetChats(string ReceiverId);
-
-        public void DeleteChat(string ReceiverId);
-
         // User Data
 
         public void SaveUserData(UserData userData);
