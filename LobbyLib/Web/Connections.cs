@@ -3,7 +3,6 @@ using ModdableWebServer;
 using NetCoreServer;
 using ModdableWebServer.Helper;
 using Newtonsoft.Json;
-using LobbyLib.JWT;
 using EIV_Common.InfoJson;
 
 namespace LobbyLib.Web;
@@ -46,7 +45,7 @@ internal class Connections
             MainControl.Database.SaveUserData(data);
         }
 
-        serverStruct.Response.MakeGetResponse(JWTHelper.Create(data));
+        serverStruct.Response.MakeGetResponse();
         serverStruct.SendResponse();
         return true;
     }

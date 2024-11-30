@@ -1,8 +1,7 @@
 ﻿using System.Reflection;
 using EIV_DataPack;
-using EIV_JsonLib.Modding;
 using EIV_JsonLib;
-using EIV_JsonLib.Convert;
+using EIV_JsonLib.Json;
 using EIV_Common;
 using EIV_Common.JsonStuff;
 
@@ -121,7 +120,7 @@ public class ModLoader
             return;
 
         //Console.WriteLine("jsonLib converter added");
-        JsonLibConverters.ModdedConverters.Add(jsonLib);
+        CoreConverters.Converters.Add(jsonLib);
     }
 
     static void LoadLobbyMod(Assembly assembly)

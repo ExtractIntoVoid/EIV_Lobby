@@ -1,6 +1,6 @@
 ﻿using LobbyLib.Jsons;
-using EIV_JsonLib.Convert;
-using Newtonsoft.Json;
+using EIV_JsonLib.Json;
+using System.Text.Json;
 
 namespace LobbyLib.Database;
 
@@ -22,28 +22,23 @@ internal class JsonDatabase : IDatabase
 
     }
 
-    public void SaveInventory(Inventory inventory)
+    public void SaveInventory(UserInventory inventory)
     {
         Create();
         var json = Path.Combine(dir_path, inventory.UserId.ToString().Replace("-","_"), "Inventory.json");
         if (!Directory.Exists(Path.GetDirectoryName(json)))
             Directory.CreateDirectory(Path.GetDirectoryName(json)!);
-        File.WriteAllText(json, JsonConvert.SerializeObject(inventory, new JsonSerializerSettings()
-        { 
-            Formatting = Formatting.Indented,
-            NullValueHandling = NullValueHandling.Ignore,
-            MissingMemberHandling = MissingMemberHandling.Ignore
-        }));
+        File.WriteAllText(json, JsonSerializer.Serialize(inventory));
     }
 
-    public Inventory? GetInventory(Guid Id)
+    public UserInventory? GetInventory(Guid Id)
     {
         Create();
         var json = Path.Combine(dir_path, Id.ToString().Replace("-", "_"), "Inventory.json");
         if (!File.Exists(json))
             return null;
         var settings = ConvertHelper.GetSerializerSettings();
-        return JsonConvert.DeserializeObject<Inventory>(File.ReadAllText(json), settings);
+        return JsonSerializer.Deserialize<UserInventory>(File.ReadAllText(json), settings);
     }
 
 
@@ -54,15 +49,14 @@ internal class JsonDatabase : IDatabase
         if (!File.Exists(json))
             return null;
         var settings = ConvertHelper.GetSerializerSettings();
-        return JsonConvert.DeserializeObject<StashInventory>(File.ReadAllText(json), settings);
+        return JsonSerializer.Deserialize<StashInventory>(File.ReadAllText(json), settings);
     }
 
     public void SaveStashInventory(StashInventory inventory)
     {
         Create();
         var json = Path.Combine(dir_path, inventory.UserId.ToString().Replace("-", "_"), "StashInventory.json");
-        var settings = ConvertHelper.GetSerializerSettings();
-        File.WriteAllText(json, JsonConvert.SerializeObject(inventory, settings));
+        File.WriteAllText(json, JsonSerializer.Serialize(inventory));
     }
 
     public void DeleteInventory(Guid Id)

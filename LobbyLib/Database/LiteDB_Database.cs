@@ -28,7 +28,7 @@ internal class LiteDB_Database : IDatabase
     {
         
     }
-    public Inventory? GetInventory(Guid Id)
+    public UserInventory? GetInventory(Guid Id)
     {
         return null;
     }
@@ -48,7 +48,7 @@ internal class LiteDB_Database : IDatabase
         
     }
 
-    public void SaveInventory(Inventory inventory)
+    public void SaveInventory(UserInventory inventory)
     {
         
     }

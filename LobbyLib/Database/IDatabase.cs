@@ -12,9 +12,9 @@ namespace LobbyLib.Database
 
         // Inventory
 
-        public void SaveInventory(Inventory inventory);
+        public void SaveInventory(UserInventory inventory);
 
-        public Inventory? GetInventory(Guid Id);
+        public UserInventory? GetInventory(Guid Id);
 
         public void DeleteInventory(Guid Id);
 

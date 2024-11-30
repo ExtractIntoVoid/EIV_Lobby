@@ -2,8 +2,8 @@
 using ModdableWebServer;
 using NetCoreServer;
 using ModdableWebServer.Helper;
-using EIV_Common.InfoJson;
 using EIV_Common;
+using EIV_JsonLib;
 
 namespace LobbyLib.Web;
 
@@ -14,7 +14,7 @@ internal class About
     {
         ServerInfoJson serverInfoJSON = new()
         {
-            Connection = new()
+            GameServerInfo = new()
             {
                 ServerAddress = ConfigINI.Read("Lobby.ini", "Lobby", "ServerAddress"),
                 ServerPort = ConfigINI.Read<int>("Lobby.ini", "Lobby", "ServerPort"),

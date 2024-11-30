@@ -29,7 +29,7 @@ internal class EmptyDatabase : IDatabase
         
     }
 
-    public Inventory? GetInventory(Guid Id)
+    public UserInventory? GetInventory(Guid Id)
     {
         return null;
     }
@@ -49,7 +49,7 @@ internal class EmptyDatabase : IDatabase
         
     }
 
-    public void SaveInventory(Inventory inventory)
+    public void SaveInventory(UserInventory inventory)
     {
         
     }

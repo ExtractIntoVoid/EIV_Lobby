@@ -1,4 +1,4 @@
-﻿using EIV_JsonLib.Interfaces;
+﻿using EIV_JsonLib;
 using Newtonsoft.Json;
 
 namespace LobbyLib.Jsons;
@@ -14,5 +14,5 @@ public class StashInventory
     /// <summary>
     /// Only Compress and send Stash!
     /// </summary>
-    public required IStash Stash { get; set; }
+    public required Stash Stash { get; set; }
 }

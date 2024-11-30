@@ -19,12 +19,6 @@ namespace LobbyLib.Web
                 return;
             }
 
-            if (JWT.JWTHelper.Validate(jwt))
-            {
-                socketStruct.SendWebSocketClose(401, "JWT is invalid!");
-                return;
-            }
-
             var body = socketStruct.Request.Body; // body must be the RSA public key when joining!
             if (body.Contains("RSAKeyValue") && body.Contains("RSAKeyValue") && body.Contains("Modulus") && body.Contains("Exponent") && !body.Contains("<P>"))
             {
