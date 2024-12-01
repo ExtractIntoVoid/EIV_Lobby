@@ -4,30 +4,34 @@ using NetCoreServer;
 using ModdableWebServer.Helper;
 using EIV_Common;
 using EIV_JsonLib;
+using System.Text.Json;
 
 namespace LobbyLib.Web;
 
 internal class About
 {
     [HTTP("GET", "/EIV_Lobby/About")]
-    public static bool Connect(HttpRequest request, ServerStruct serverStruct)
+    public static bool Connect(HttpRequest _, ServerStruct serverStruct)
     {
         ServerInfoJson serverInfoJSON = new()
         {
             Game = new()
             {
                 Version = ConfigINI.Read("Lobby.ini", "Lobby", "Version"),
+                AvailableMaps = []
             },
-            Server = new()
+            LobbyInfo = new()
             { 
-                ServerDescription = ConfigINI.Read("Lobby.ini", "Lobby", "Name"),
-                ServerName = ConfigINI.Read("Lobby.ini", "Lobby", "Description"),
-
-            }
-
+                Name = ConfigINI.Read("Lobby.ini", "Lobby", "Name"),
+                Description = ConfigINI.Read("Lobby.ini", "Lobby", "Description"),
+                LongDescription = ConfigINI.Read("Lobby.ini", "Lobby", "LongDescription"),
+                MaxPlayerNumbers = ConfigINI.Read<int>("Lobby.ini", "Lobby", "MaxPlayers"),
+                PlayerNumbers = ChatWebsocket.UserToWS.Count,
+            },
+            Mods = []
         };
 
-        serverStruct.Response.MakeGetResponse("");
+        serverStruct.Response.MakeGetResponse(JsonSerializer.Serialize(serverInfoJSON));
         serverStruct.SendResponse();
         return true;
     }

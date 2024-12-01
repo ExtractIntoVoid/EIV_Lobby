@@ -1,65 +1,75 @@
 ﻿using ModdableWebServer.Attributes;
-using ModdableWebServer;
-using System.Diagnostics;
-using System.Text;
-using Newtonsoft.Json.Linq;
 using ModdableWebServer.Helper;
-using System.Security.Cryptography;
+using ModdableWebServer;
+using System.Text;
+using System.Text.Json;
+using EIV_JsonLib.Lobby;
+using LobbyLib.CustomTicket;
 
-namespace LobbyLib.Web
+namespace LobbyLib.Web;
+
+public class ChatWebsocket
 {
-    public class ChatWebsocket
+    public static Dictionary<string, WebSocketStruct> UserToWS = [];
+
+    [WS("/Socket/Chat")]
+    public static void WSControl(WebSocketStruct socketStruct)
     {
-        [WS("/Socket/Chat")]
-        public static void WSControl(WebSocketStruct socketStruct)
+        if (!socketStruct.Request.Headers.TryGetValue("authorization", out var ticket))
         {
-            if (!socketStruct.Request.Headers.TryGetValue("authorization", out var jwt))
-            {
-                socketStruct.SendWebSocketClose(401, "authorization is not found!");
-                return;
-            }
-
-            var body = socketStruct.Request.Body; // body must be the RSA public key when joining!
-            if (body.Contains("RSAKeyValue") && body.Contains("RSAKeyValue") && body.Contains("Modulus") && body.Contains("Exponent") && !body.Contains("<P>"))
-            {
-                try
-                {
-                    RSA rsatest = RSA.Create();
-                    rsatest.FromXmlString(body);
-                }
-                catch (Exception)
-                {
-                    socketStruct.SendWebSocketClose(401, "Your Body is not contains wrong RSA Public Key!");
-                    return;
-                }
-                
-            }
-            else
-            {
-                socketStruct.SendWebSocketClose(401, "Your Body is not contains your RSA Public Key!");
-                return;
-            }
-
-            Console.WriteLine("websocket hit!");
-
-
-            if (socketStruct.WSRequest != null)
-            {
-                Control(socketStruct.WSRequest.Value.buffer, socketStruct.WSRequest.Value.offset, socketStruct.WSRequest.Value.size, socketStruct);
-            }
+            socketStruct.SendWebSocketClose(401, "Authorization is not found!");
+            return;
+        }
+        var ticketstruct = TicketProcess.GetTicket(ticket);
+        if (ticketstruct == null)
+        {
+            socketStruct.SendWebSocketClose(401, "wrong ticket!");
+            return;
         }
 
-        public static void Control(byte[] buffer, long offset, long size, WebSocketStruct socketStruct)
-        {
-            if (size == 0)
-                return;
-            buffer = buffer.Take((int)size).ToArray();
+        Console.WriteLine("websocket hit!");
 
+        if (socketStruct.WSRequest != null)
+        {
+            Control(socketStruct.WSRequest.Value.buffer, socketStruct.WSRequest.Value.offset, socketStruct.WSRequest.Value.size, socketStruct);
+        }
+        if (socketStruct.IsConnected)
+        {
+            UserToWS.Add(ticketstruct.Value.UserId, socketStruct);
+        }
+        if (socketStruct.IsClosed)
+        {
+            UserToWS.Remove(ticketstruct.Value.UserId);
+        }
+    }
+
+    public static void Control(byte[] buffer, long offset, long size, WebSocketStruct socketStruct)
+    {
+        if (size == 0)
+            return;
+        buffer = buffer.Take((int)size).ToArray();
+
+        try
+        {
             var str = Encoding.UTF8.GetString(buffer);
-           
-
-
+            ChatMessage? chatMessage = JsonSerializer.Deserialize<ChatMessage>(str);
+            if (chatMessage == null)
+            {
+                socketStruct.SendWebSocketClose(401, "No ChatMessage!");
+                return;
+            }
+            if (chatMessage.Message.Contains("badword"))
+                return;
+            if (!UserToWS.TryGetValue(chatMessage.ReceiverId, out var webSocketStruct))
+            {
+                // no user found
+                return;
+            }
+            webSocketStruct.SendWebSocketByteArray(buffer);
         }
-
+        catch
+        {
+            socketStruct.SendWebSocketClose(401, "Wrong encoding!");
+        }
     }
 }

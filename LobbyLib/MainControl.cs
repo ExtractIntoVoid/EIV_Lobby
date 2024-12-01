@@ -1,7 +1,6 @@
 ﻿using EIV_Common;
 using LobbyLib.Database;
 using LobbyLib.Modding;
-using LobbyLib.SocketControl;
 using LobbyLib.Web;
 using System.Diagnostics;
 
@@ -29,7 +28,6 @@ public class MainControl
         bool ssl = ConfigINI.Read<bool>("Config.ini", "Lobby", "SSL");
         string Ip = ConfigINI.Read("Config.ini", "Lobby", "ServerAddress");
         ushort port = ConfigINI.Read<ushort>("Config.ini", "Lobby", "ServerPort");
-        var sw = Stopwatch.StartNew();
         if (ssl)
         {
             string _ip_port = $"https://{Ip}:{port}";
@@ -55,12 +53,14 @@ public class MainControl
             case 0:
                 Database = new JsonDatabase();
                 break;
+            /* //Temp disable.
             case 1:
                 Database = new LiteDB_Database();
                 break;
             case 2:
                 Database = new MySQL_Database();
                 break;
+            */
             default:
                 return false;
         }

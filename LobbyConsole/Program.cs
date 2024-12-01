@@ -6,7 +6,12 @@ internal class Program
 {
     static void Main(string[] args)
     {
-        Console.WriteLine(MainControl.InitAll());
+        bool result = MainControl.InitAll();
+        if (!result)
+        {
+            Console.WriteLine("Creating Lobby Server failed!");
+            return;
+        }
         string? req = Console.ReadLine();
         while (req != "quit" && req != "q" && req != "exit")
             req = Console.ReadLine();
