@@ -1,10 +1,9 @@
-﻿using MessagePack;
+﻿using MemoryPack;
 
 namespace SharedSocket.SocketMessages;
 
-[MessagePackObject]
-public class SyncPlayerList : IMessage
+[MemoryPackable]
+public partial class SyncPlayerList : IMessage
 {
-    [Key(0)]
     public List<string> UserIds { get; set; } = [];
 }

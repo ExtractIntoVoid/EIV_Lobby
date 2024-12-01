@@ -1,8 +1,8 @@
-﻿using MessagePack;
+﻿using MemoryPack;
 
 namespace SharedSocket.SocketMessages;
 
-[Union(0, typeof(KeepAlive))]
-[Union(1, typeof(OnPlayerConnection))]
-[Union(1, typeof(SyncPlayerList))]
-public interface IMessage;
+[MemoryPackUnion(0, typeof(KeepAlive))]
+[MemoryPackUnion(1, typeof(OnPlayerConnection))]
+[MemoryPackUnion(2, typeof(SyncPlayerList))]
+public partial interface IMessage;

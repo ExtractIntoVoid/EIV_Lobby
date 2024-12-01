@@ -1,6 +1,7 @@
 ﻿using EIV_Common;
 using LobbyLib.Database;
 using LobbyLib.Modding;
+using LobbyLib.SocketControl;
 using LobbyLib.Web;
 using System.Diagnostics;
 
@@ -64,7 +65,6 @@ public class MainControl
                 return false;
         }
         Database.Create();
-
         ModLoader.LoadMods();
 
         //start game server(s)

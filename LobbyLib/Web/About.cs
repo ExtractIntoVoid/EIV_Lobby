@@ -14,14 +14,15 @@ internal class About
     {
         ServerInfoJson serverInfoJSON = new()
         {
-            GameServerInfo = new()
-            {
-                ServerAddress = ConfigINI.Read("Lobby.ini", "Lobby", "ServerAddress"),
-                ServerPort = ConfigINI.Read<int>("Lobby.ini", "Lobby", "ServerPort"),
-            },
             Game = new()
             {
                 Version = ConfigINI.Read("Lobby.ini", "Lobby", "Version"),
+            },
+            Server = new()
+            { 
+                ServerDescription = ConfigINI.Read("Lobby.ini", "Lobby", "Name"),
+                ServerName = ConfigINI.Read("Lobby.ini", "Lobby", "Description"),
+
             }
 
         };

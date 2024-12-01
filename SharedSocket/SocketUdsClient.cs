@@ -3,15 +3,13 @@ using System.Net.Sockets;
 
 namespace SharedSocket;
 
-public class SocketUdsClient : UdsClient
+public class SocketUdsClient(string path) : UdsClient(path)
 {
-    public event Received? ReceivedEvent;
-
-    public SocketUdsClient(string path) : base(path) { }
+    public event ReceivedClient? ReceivedEvent;
 
     protected override void OnReceived(byte[] buffer, long offset, long size)
     {
-        ReceivedEvent?.Invoke(buffer.Skip((int)offset).Take((int)size).ToArray());
+        ReceivedEvent?.Invoke(this, buffer.Skip((int)offset).Take((int)size).ToArray());
         ReceiveAsync();
     }
 

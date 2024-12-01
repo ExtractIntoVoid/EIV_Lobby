@@ -1,6 +1,6 @@
-﻿using MessagePack;
+﻿using MemoryPack;
 
 namespace SharedSocket.SocketMessages;
 
-[MessagePackObject]
-public class KeepAlive : IMessage;
+[MemoryPackable]
+public partial class KeepAlive : IMessage;

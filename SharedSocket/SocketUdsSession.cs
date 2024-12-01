@@ -3,16 +3,14 @@ using System.Net.Sockets;
 
 namespace SharedSocket;
 
-public class SocketUdsSession : UdsSession
+public class SocketUdsSession(UdsServer server) : UdsSession(server)
 {
-    public SocketUdsSession(UdsServer server) : base(server) { }
-
-    public event Received? ReceivedEvent;
-    public SockedUdsServer SockedUdsServer => (SockedUdsServer)Server;
+    public event ReceivedSession? ReceivedEvent;
+    public SocketUdsServer SockedUdsServer => (SocketUdsServer)Server;
 
     protected override void OnReceived(byte[] buffer, long offset, long size)
     {
-        ReceivedEvent?.Invoke(buffer.Skip((int)offset).Take((int)size).ToArray());
+        ReceivedEvent?.Invoke(this, buffer.Skip((int)offset).Take((int)size).ToArray());
         ReceiveAsync();
     }
 
