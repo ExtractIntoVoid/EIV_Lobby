@@ -8,10 +8,10 @@ using System.Text.Json;
 
 namespace LobbyLib.Web;
 
-internal class About
+internal partial class EIV_Lobby
 {
     [HTTP("GET", "/EIV_Lobby/About")]
-    public static bool Connect(HttpRequest _, ServerStruct serverStruct)
+    public static bool LobbyAbout(HttpRequest _, ServerStruct serverStruct)
     {
         ServerInfoJson serverInfoJSON = new()
         {

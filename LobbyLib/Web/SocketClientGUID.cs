@@ -23,9 +23,9 @@ internal struct Group
     public bool OwnerInvite;
 }
 
-internal class SocketClientGUID
+internal partial class EIV_Lobby
 {
-    public static Dictionary<string, WebSocketStruct> UserToWS = [];
+    public static Dictionary<string, WebSocketStruct> ClientUserToWS = [];
 
     public static List<MapQueue> MapQueues = [];
 
@@ -57,11 +57,11 @@ internal class SocketClientGUID
         }
         if (socketStruct.IsConnected)
         {
-            UserToWS.Add(ticketstruct.Value.UserId, socketStruct);
+            ClientUserToWS.Add(ticketstruct.Value.UserId, socketStruct);
         }
         if (socketStruct.IsClosed)
         {
-            UserToWS.Remove(ticketstruct.Value.UserId);
+            ClientUserToWS.Remove(ticketstruct.Value.UserId);
         }
     }
 
@@ -150,7 +150,7 @@ internal class SocketClientGUID
                         GroupInvite? groupInvite = JsonSerializer.Deserialize<GroupInvite>(message.JsonMessage);
                         if (groupInvite == null)
                             return;
-                        if (!UserToWS.TryGetValue(groupInvite.Invitee, out var webSocketStruct))
+                        if (!ClientUserToWS.TryGetValue(groupInvite.Invitee, out var webSocketStruct))
                         {
                             // User not connected to websocket. Throw it out.
                             return;
@@ -168,7 +168,7 @@ internal class SocketClientGUID
                         GroupKick? groupKick = JsonSerializer.Deserialize<GroupKick>(message.JsonMessage);
                         if (groupKick == null)
                             return;
-                        if (!UserToWS.TryGetValue(groupKick.Invitee, out var webSocketStruct))
+                        if (!ClientUserToWS.TryGetValue(groupKick.Invitee, out var webSocketStruct))
                         {
                             // User not connected to websocket. Throw it out.
                             return;

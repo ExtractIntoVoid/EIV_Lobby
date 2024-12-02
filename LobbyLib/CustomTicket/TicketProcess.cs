@@ -13,7 +13,8 @@ public class TicketProcess
     public static void Start()
     {
         var rsa = RSA.Create(2048);
-        File.WriteAllText("rsa.xml", rsa.ToXmlString(true));
+        if (!File.Exists("rsa.xml"))
+            File.WriteAllText("rsa.xml", rsa.ToXmlString(true));
         rsa.FromXmlString(File.ReadAllText("rsa.xml"));
         Service = new RsaService(rsa);
     }

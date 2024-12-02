@@ -10,16 +10,23 @@ using LobbyLib.CustomTicket;
 
 namespace LobbyLib.Web;
 
-internal class Connections
+internal partial class EIV_Lobby
 {
     
     [HTTP("POST", "/EIV_Lobby/Connect")]
-    public static bool Connect(HttpRequest request, ServerStruct serverStruct)
+    public static bool LobbyConnect(HttpRequest request, ServerStruct serverStruct)
     {
+        if (string.IsNullOrEmpty(request.Body))
+        {
+            serverStruct.Response.MakeErrorResponse();
+            serverStruct.SendResponse();
+            return true;
+        }
+
         var userinfo = JsonSerializer.Deserialize<UserInfoJson>(request.Body);
         if (userinfo == null)
         {
-            serverStruct.Response.MakeErrorResponse("UserInfoJson_JWT cannot parse");
+            serverStruct.Response.MakeErrorResponse("UserInfoJson cannot parse");
             serverStruct.SendResponse();
             return true;
         }
@@ -27,7 +34,7 @@ internal class Connections
         // Simple version check. PLEASE REPLACE WITH NORMAL ONE!
         if (userinfo.Version != ConfigINI.Read("Lobby.ini", "Lobby", "Version"))
         {
-            serverStruct.Response.MakeErrorResponse();
+            serverStruct.Response.MakeErrorResponse("VersionCheck");
             serverStruct.SendResponse();
             return true;
         }
@@ -45,6 +52,8 @@ internal class Connections
                 FriendRequests = [],
             };
             MainControl.Database.SaveUserData(data);
+
+            // TODO: Create a new save file.
         }
         var ticket = TicketProcess.CreateTicket(data);
 

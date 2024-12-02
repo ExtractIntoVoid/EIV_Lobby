@@ -6,7 +6,7 @@ using LobbyLib.Modding;
 
 namespace LobbyLib.Web;
 
-public class ModFiles
+internal partial class EIV_Lobby
 {
     [HTTP("GET", "/EIV_Lobby/Files/Client/Mods/{modpath}")]
     public static bool ClientMods(HttpRequest request, ServerStruct serverStruct)

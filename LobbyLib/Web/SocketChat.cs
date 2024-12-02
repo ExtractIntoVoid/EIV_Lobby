@@ -8,12 +8,12 @@ using LobbyLib.CustomTicket;
 
 namespace LobbyLib.Web;
 
-public class ChatWebsocket
+internal partial class EIV_Lobby
 {
-    public static Dictionary<string, WebSocketStruct> UserToWS = [];
+    public static Dictionary<string, WebSocketStruct> ChatUserToWS = [];
 
-    [WS("/Socket/Chat")]
-    public static void WSControl(WebSocketStruct socketStruct)
+    [WS("/EIV_Lobby/Socket/Chat")]
+    public static void SocketChat(WebSocketStruct socketStruct)
     {
         if (!socketStruct.Request.Headers.TryGetValue("authorization", out var ticket))
         {
@@ -35,11 +35,11 @@ public class ChatWebsocket
         }
         if (socketStruct.IsConnected)
         {
-            UserToWS.Add(ticketstruct.Value.UserId, socketStruct);
+            ChatUserToWS.Add(ticketstruct.Value.UserId, socketStruct);
         }
         if (socketStruct.IsClosed)
         {
-            UserToWS.Remove(ticketstruct.Value.UserId);
+            ChatUserToWS.Remove(ticketstruct.Value.UserId);
         }
     }
 
@@ -66,7 +66,7 @@ public class ChatWebsocket
                 return;
             if (recUser.BlockList.FriendInviteBlocks.Contains(chatMessage.SenderId))
                 return;
-            if (!UserToWS.TryGetValue(chatMessage.ReceiverId, out var webSocketStruct))
+            if (!ChatUserToWS.TryGetValue(chatMessage.ReceiverId, out var webSocketStruct))
             {
                 // User isnt active, should we store it to send to receiver? [Currently not.]
                 return;
