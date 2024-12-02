@@ -6,8 +6,7 @@ internal class Program
 {
     static void Main(string[] args)
     {
-        bool result = MainControl.InitAll();
-        if (!result)
+        if (!MainControl.InitAll())
         {
             Console.WriteLine("Creating Lobby Server failed!");
             return;

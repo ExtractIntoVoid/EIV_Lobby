@@ -58,11 +58,17 @@ public class ChatWebsocket
                 socketStruct.SendWebSocketClose(401, "No ChatMessage!");
                 return;
             }
+            // Better badword filter here.
             if (chatMessage.Message.Contains("badword"))
+                return;
+            var recUser = MainControl.Database.GetUserData(chatMessage.ReceiverId);
+            if (recUser == null)
+                return;
+            if (recUser.BlockList.FriendInviteBlocks.Contains(chatMessage.SenderId))
                 return;
             if (!UserToWS.TryGetValue(chatMessage.ReceiverId, out var webSocketStruct))
             {
-                // no user found
+                // User isnt active, should we store it to send to receiver? [Currently not.]
                 return;
             }
             webSocketStruct.SendWebSocketByteArray(buffer);
