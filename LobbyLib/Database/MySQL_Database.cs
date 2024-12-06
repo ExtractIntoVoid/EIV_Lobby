@@ -4,10 +4,6 @@ namespace LobbyLib.Database;
 
 internal class MySQL_Database : IDatabase
 {
-    public void Close()
-    {
-        
-    }
 
     public void Create()
     {
@@ -24,7 +20,7 @@ internal class MySQL_Database : IDatabase
         
     }
 
-    public void DeleteUserData(string UserId)
+    public void DeleteUserData(Guid Id)
     {
         
     }
@@ -39,15 +35,16 @@ internal class MySQL_Database : IDatabase
         return null;
     }
 
-    public UserData? GetUserData(string UserId)
+    public UserData? GetUserData(Guid Id)
     {
         return null;
     }
 
-    public void Open()
+    public List<UserData> GetUserDatas()
     {
-        
+        return [];
     }
+
     public void SaveInventory(UserInventory inventory)
     {
         

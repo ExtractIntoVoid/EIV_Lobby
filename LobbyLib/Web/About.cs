@@ -26,7 +26,7 @@ internal partial class EIV_Lobby
                 Description = ConfigINI.Read("Lobby.ini", "Lobby", "Description"),
                 LongDescription = ConfigINI.Read("Lobby.ini", "Lobby", "LongDescription"),
                 MaxPlayerNumbers = ConfigINI.Read<int>("Lobby.ini", "Lobby", "MaxPlayers"),
-                PlayerNumbers = ChatWebsocket.UserToWS.Count,
+                PlayerNumbers = ChatUserToWS.Count
             },
             Mods = []
         };

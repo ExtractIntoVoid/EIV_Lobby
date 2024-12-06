@@ -10,10 +10,10 @@ public class SockControl
 
     public static int PlayerNumber { get; internal set; }
 
-    public static void StartServer(string ip, int port, string map)
+    public static void StartServer(int port, string map)
     {
         //LobbySocket_{ SHA1(LobbbyIPPort_GameServerPort)}.sock
-        var path = $"LobbySocket_{ip}_{port}_{map}.sock";
+        var path = $"LobbySocket_{port}_{map}.sock";
         SocketUdsServer sockedUdsServer = new(path);
         sockedUdsServer.Connected += SockedUdsServer_Connected;
         sockedUdsServer.Disconnected += SockedUdsServer_Disconnected;
@@ -21,9 +21,9 @@ public class SockControl
         Servers.Add(sockedUdsServer);
     }
 
-    public static void StopServer(string ip, int port, string map)
+    public static void StopServer(int port, string map)
     {
-       var server = Servers.FirstOrDefault(x=>x.Path == $"LobbySocket_{ip}_{port}_{map}.sock");
+       var server = Servers.FirstOrDefault(x=>x.Path == $"LobbySocket_{port}_{map}.sock");
         if (server == null)
             return;
         server.Connected += SockedUdsServer_Connected;

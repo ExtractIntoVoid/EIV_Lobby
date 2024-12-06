@@ -8,11 +8,10 @@ namespace LobbyLib;
 
 public class MainControl
 {
-    public static bool IsAlreadyQuited = false;
-    public static string IP = "https://127.0.0.1:7777";
-    public static string ip_port = "127.0.0.1:7777";
-    public static IDatabase Database = new EmptyDatabase();
-    public static List<Process> GameServerProcesses = [];
+    public static bool IsAlreadyQuited { get; internal set; } = false;
+    public static string IP { get; internal set; } = "https://127.0.0.1:7777";
+    public static string Ip_Port { get; internal set; } = "127.0.0.1:7777";
+    public static IDatabase Database { get; internal set; } = new EmptyDatabase();
 
     /// <summary>
     /// Init the Server
@@ -32,13 +31,13 @@ public class MainControl
         {
             string _ip_port = $"https://{Ip}:{port}";
             IP = _ip_port;
-            ip_port = $"{Ip}:{port}";
+            Ip_Port = $"{Ip}:{port}";
         }
         else
         {
             string _ip_port = $"http://{Ip}:{port}";
             IP = _ip_port;
-            ip_port = $"{Ip}:{port}";
+            Ip_Port = $"{Ip}:{port}";
         }
         ServerManager.Start(Ip, port, ssl);
 
@@ -66,22 +65,6 @@ public class MainControl
         }
         Database.Create();
         ModLoader.LoadMods();
-
-        //start game server(s)
-        bool LaunchGameServerInstant = ConfigINI.Read<bool>("Config.ini", "GameServer", "LaunchGameServerInstant");
-        string ServerPath = ConfigINI.Read("Config.ini", "GameServer", "ServerPath");
-        if (LaunchGameServerInstant && !string.IsNullOrEmpty(ServerPath))
-        {
-            Process.EnterDebugMode();
-            var proc = Process.Start(new ProcessStartInfo()
-            {
-                FileName = ServerPath,
-            });
-            if (proc != null)
-                GameServerProcesses.Add(proc);
-            else
-                Console.WriteLine("GameServer was not started!");
-        }
         return true;
     }
 
@@ -92,14 +75,6 @@ public class MainControl
     {
         if (IsAlreadyQuited)
             return;
-        foreach (var item in GameServerProcesses)
-        {
-            item.Kill();
-            item.Close();
-            item.Dispose();
-        }
-
-        GameServerProcesses.Clear();
         ModLoader.UnloadMods();
         ServerManager.Stop();
         IsAlreadyQuited = true;

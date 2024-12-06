@@ -39,10 +39,10 @@ internal partial class EIV_Lobby
             return true;
         }
 
-        var data = MainControl.Database.GetUserData(userinfo.CreateUserId());
-        if (data == null)
+        var user = MainControl.Database.GetUserDatas().FirstOrDefault(x => x.UserId == userinfo.CreateUserId());
+        if (user == null)
         {
-            data = new()
+            user = new()
             {
                 Id = Guid.NewGuid(),
                 UserId = userinfo.CreateUserId(),
@@ -51,15 +51,15 @@ internal partial class EIV_Lobby
                 BlockList = new(),
                 FriendRequests = [],
             };
-            MainControl.Database.SaveUserData(data);
+            MainControl.Database.SaveUserData(user);
 
             // TODO: Create a new save file.
         }
-        var ticket = TicketProcess.CreateTicket(data);
+        var ticket = TicketProcess.CreateTicket(user);
 
         ConnectResponse connectResponse = new()
         { 
-            Id = data.Id,
+            Id = user.Id,
             Ticket = ticket,
         };
 

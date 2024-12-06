@@ -1,0 +1,4 @@
+0 - No Error
+1 - Already in Group
+2 - You are not the Group owner
+3 - You cannot send Invite to this user.

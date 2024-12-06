@@ -10,7 +10,7 @@ namespace LobbyLib.Web;
 
 internal partial class EIV_Lobby
 {
-    public static Dictionary<string, WebSocketStruct> ChatUserToWS = [];
+    public static Dictionary<TicketStruct, WebSocketStruct> ChatUserToWS = [];
 
     [WS("/EIV_Lobby/Socket/Chat")]
     public static void SocketChat(WebSocketStruct socketStruct)
@@ -31,27 +31,25 @@ internal partial class EIV_Lobby
 
         if (socketStruct.WSRequest != null)
         {
-            Control(socketStruct.WSRequest.Value.buffer, socketStruct.WSRequest.Value.offset, socketStruct.WSRequest.Value.size, socketStruct);
+            ReadOnlySpan<byte> data = socketStruct.WSRequest.Value.buffer.Skip((int)socketStruct.WSRequest.Value.offset).Take((int)socketStruct.WSRequest.Value.size).ToArray();
+            ControlChat(data, socketStruct, ticketstruct.Value);
         }
         if (socketStruct.IsConnected)
         {
-            ChatUserToWS.Add(ticketstruct.Value.UserId, socketStruct);
+            ChatUserToWS.Add(ticketstruct.Value, socketStruct);
         }
         if (socketStruct.IsClosed)
         {
-            ChatUserToWS.Remove(ticketstruct.Value.UserId);
+            ChatUserToWS.Remove(ticketstruct.Value);
         }
     }
 
-    public static void Control(byte[] buffer, long offset, long size, WebSocketStruct socketStruct)
+    public static void ControlChat(ReadOnlySpan<byte> data, WebSocketStruct socketStruct, TicketStruct ticketStruct)
     {
-        if (size == 0)
-            return;
-        buffer = buffer.Take((int)size).ToArray();
 
         try
         {
-            var str = Encoding.UTF8.GetString(buffer);
+            var str = Encoding.UTF8.GetString(data);
             ChatMessage? chatMessage = JsonSerializer.Deserialize<ChatMessage>(str);
             if (chatMessage == null)
             {
@@ -61,17 +59,22 @@ internal partial class EIV_Lobby
             // Better badword filter here.
             if (chatMessage.Message.Contains("badword"))
                 return;
-            var recUser = MainControl.Database.GetUserData(chatMessage.ReceiverId);
+            var recUser = MainControl.Database.GetUserDatas().FirstOrDefault(x => x.UserId == chatMessage.ReceiverId);
             if (recUser == null)
                 return;
             if (recUser.BlockList.FriendInviteBlocks.Contains(chatMessage.SenderId))
                 return;
-            if (!ChatUserToWS.TryGetValue(chatMessage.ReceiverId, out var webSocketStruct))
+
+            var ticket = ChatUserToWS.Keys.FirstOrDefault(x => x.UserId == chatMessage.ReceiverId);
+            if (string.IsNullOrEmpty(ticket.UserId))
+                return;
+
+            if (!ChatUserToWS.TryGetValue(ticket, out var webSocketStruct))
             {
                 // User isnt active, should we store it to send to receiver? [Currently not.]
                 return;
             }
-            webSocketStruct.SendWebSocketByteArray(buffer);
+            webSocketStruct.SendWebSocketByteArray(data.ToArray());
         }
         catch
         {

@@ -1,37 +1,26 @@
 ﻿using LobbyLib.Jsons;
 
-namespace LobbyLib.Database
+namespace LobbyLib.Database;
+
+public interface IDatabase
 {
-    public interface IDatabase
-    {
-        public void Create();
+    public void Create();
 
-        public void Open();
+    // Inventory
+    public void SaveInventory(UserInventory inventory);
+    public UserInventory? GetInventory(Guid Id);
+    public void DeleteInventory(Guid Id);
 
-        public void Close();
+    // Stash
 
-        // Inventory
+    public void SaveStashInventory(StashInventory inventory);
+    public StashInventory? GetStashInventory(Guid Id);        
+    public void DeleteStashInventory(Guid Id);
 
-        public void SaveInventory(UserInventory inventory);
+    // User Data
 
-        public UserInventory? GetInventory(Guid Id);
-
-        public void DeleteInventory(Guid Id);
-
-        // Stash
-
-        public void SaveStashInventory(StashInventory inventory);
-
-        public StashInventory? GetStashInventory(Guid Id);        
-
-        public void DeleteStashInventory(Guid Id);
-
-        // User Data
-
-        public void SaveUserData(UserData userData);
-
-        public UserData? GetUserData(string UserId);
-
-        public void DeleteUserData(string UserId);
-    }
+    public void SaveUserData(UserData userData);
+    public List<UserData> GetUserDatas();
+    public UserData? GetUserData(Guid Id);
+    public void DeleteUserData(Guid Id);
 }
