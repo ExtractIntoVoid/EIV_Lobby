@@ -53,25 +53,15 @@ internal partial class EIV_Lobby
                 return;
             if (GroupManager.Manage(data, socketStruct, ticket, message.Enum, message))
                 return;
-
+            if (FriendManager.Manage(socketStruct, ticket, message.Enum, message))
+                return;
 
             switch (message.Enum)
             {
-                case ClientSocketEnum.None:
-                    break;
                 case ClientSocketEnum.MatchmakeCheck:
                     QueueManager.AddQueue(socketStruct, ticket, message);
                     break;
-                case ClientSocketEnum.FriendSearch:
-                    break;
-                case ClientSocketEnum.FriendSearchResponse:
-                    break;
-                case ClientSocketEnum.FriendAction:
-                    break;
-                case ClientSocketEnum.BlockListUpdate:
-                    break;
                 default:
-                    
                     break;
             }
         }

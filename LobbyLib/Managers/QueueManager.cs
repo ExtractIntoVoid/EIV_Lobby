@@ -69,14 +69,20 @@ public class QueueManager
     // And add logic for actually starting the game and the server respectively.
     public static void CheckQueue()
     {
+        if (MapQueues.Count == 0)
+            return;
+
+        if (Maps.Count == 0)
+            return;
+
         foreach (var mapqueue in MapQueues)
         {
             var maps = Maps.FindAll(x=>x.Name == mapqueue.Map && x.MinPlayer <= mapqueue.UserIds.Count && x.MaxPlayer > mapqueue.UserIds.Count);
             foreach (var map in maps)
             {
                 //  start the server.
-                var result = GameStartManager.StartGameServer(map.Name);
-                if (result.port == 0)
+                var (ip, port) = GameStartManager.StartGameServer(map.Name);
+                if (port == 0)
                     continue;
                 foreach (var userId in mapqueue.UserIds)
                 {
@@ -86,8 +92,8 @@ public class QueueManager
                     }
                     EIV_Lobby.SendResponse(webSocketStruct, new GameStart()
                     { 
-                        Address = result.ip,
-                        Port = result.port
+                        Address = ip,
+                        Port = port
                     }, ClientSocketEnum.GameStart);
                 }
 

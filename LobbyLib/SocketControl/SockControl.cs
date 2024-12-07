@@ -1,4 +1,6 @@
-﻿using MemoryPack;
+﻿using EIV_Common.Coroutines;
+using LobbyLib.Managers;
+using MemoryPack;
 using SharedSocket;
 using SharedSocket.SocketMessages;
 
@@ -12,7 +14,6 @@ public class SockControl
 
     public static void StartServer(int port, string map)
     {
-        //LobbySocket_{ SHA1(LobbbyIPPort_GameServerPort)}.sock
         var path = $"LobbySocket_{port}_{map}.sock";
         SocketUdsServer sockedUdsServer = new(path);
         sockedUdsServer.Connected += SockedUdsServer_Connected;
@@ -55,8 +56,10 @@ public class SockControl
         {
             case KeepAlive keepAlive:
                 {
-                    Thread.Sleep(10);
-                    session.Send(MemoryPackSerializer.Serialize<IMessage>(keepAlive));
+                    CoroutineWorkerCustom.CallDelayed(TimeSpan.FromMilliseconds(10), () => 
+                    {
+                        session.Send(MemoryPackSerializer.Serialize<IMessage>(keepAlive));
+                    });
                 }
                 break;
             case OnPlayerConnection onPlayerConnection:
@@ -70,6 +73,19 @@ public class SockControl
             case SyncPlayerList syncPlayerList:
                 {
                     PlayerNumber = syncPlayerList.UserIds.Count;
+                }
+                break;
+            case SyncMaps syncMaps:
+                {
+                    foreach (var map in syncMaps.Maps)
+                    {
+                        QueueManager.Maps.Add(new()
+                        { 
+                            Name = map.Name,
+                            MinPlayer = map.MinPlayers,
+                            MaxPlayer = map.MaxPlayers,
+                        });
+                    }
                 }
                 break;
             default:

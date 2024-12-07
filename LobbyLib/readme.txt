@@ -20,7 +20,7 @@ Files/Server/Mods/{Modpath}
 Game connect to this Lobby with Socket Server "Mod".
 
 Socket Naming:
-LobbySocket_{LobbbyIPPort_GameServerPort).sock
+LobbySocket_{GameServerPort}_{MapToPlay}.sock
 
 - Group
 

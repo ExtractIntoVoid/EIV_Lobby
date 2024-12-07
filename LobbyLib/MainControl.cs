@@ -1,13 +1,16 @@
 ﻿using EIV_Common;
+using EIV_Common.Coroutines;
 using LobbyLib.Database;
+using LobbyLib.Managers;
 using LobbyLib.Modding;
 using LobbyLib.Web;
-using System.Diagnostics;
 
 namespace LobbyLib;
 
 public class MainControl
 {
+    static Coroutine? QueueRunner;
+    static Coroutine? ProcessRunner;
     public static bool IsAlreadyQuited { get; internal set; } = false;
     public static string IP { get; internal set; } = "https://127.0.0.1:7777";
     public static string Ip_Port { get; internal set; } = "127.0.0.1:7777";
@@ -18,6 +21,8 @@ public class MainControl
     /// </summary>
     public static bool InitAll()
     {
+        // Init custom coroutine. not doing much but we need later on.
+        CoroutineWorkerCustom.KillCoroutines();
         // ini check
         if (!File.Exists("Config.ini"))
         {
@@ -65,6 +70,9 @@ public class MainControl
         }
         Database.Create();
         ModLoader.LoadMods();
+        GameStartManager.ControlInit();
+        QueueRunner = CoroutineWorkerCustom.CallPeriodically(TimeSpan.FromSeconds(100), QueueManager.CheckQueue);
+        ProcessRunner = CoroutineWorkerCustom.CallPeriodically(TimeSpan.FromSeconds(100), GameStartManager.CheckProcesss);
         return true;
     }
 
@@ -74,7 +82,13 @@ public class MainControl
     public static void Stop()
     {
         if (IsAlreadyQuited)
-            return;
+            return; 
+        if (QueueRunner != null)
+            CoroutineWorkerCustom.KillCoroutineInstance(QueueRunner.Value);
+        QueueRunner = null;
+        if (ProcessRunner != null)
+            CoroutineWorkerCustom.KillCoroutineInstance(ProcessRunner.Value);
+        ProcessRunner = null;
         ModLoader.UnloadMods();
         ServerManager.Stop();
         IsAlreadyQuited = true;

@@ -1,5 +1,6 @@
 ﻿using EIV_Common;
 using LobbyLib.SocketControl;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace LobbyLib.Managers;
@@ -14,7 +15,9 @@ internal class GameStartManager
         string ServerPath = ConfigINI.Read("Config.ini", "GameServer", "ServerPath");
         if (LaunchGameServerInstant && !string.IsNullOrEmpty(ServerPath))
         {
-            StartGame(ServerPath, string.Empty);
+            // no host should disable auto hosting.
+            // that means every mod should load then we get a list for maps, then sync and quit.
+            StartGame(ServerPath, "--nohost");
         }
     }
     public static (string ip, int port) StartGameServer(string map)
@@ -25,7 +28,7 @@ internal class GameStartManager
         if (!File.Exists(ServerPath))
             return (string.Empty, 0);
         string PortsAvailable = ConfigINI.Read("Config.ini", "GameServer", "PortsAvailable");
-        if (!PortsAvailable.Contains(","))
+        if (!PortsAvailable.Contains(','))
         {
             // it doesnt have ports as a list. might be has 1 value?
             if (!int.TryParse(PortsAvailable, out int res))
@@ -46,11 +49,11 @@ internal class GameStartManager
             }
         }
         List<int> Ports = [];
-        foreach (var port in PortsAvailable.Split(","))
+        foreach (var port in PortsAvailable.Split('-'))
         {
-            if (port.Contains("-"))
+            if (port.Contains('-'))
             {
-                var split_port = port.Split("-");
+                var split_port = port.Split('-');
                 var first_port_str = split_port[0];
                 var last_port_str = split_port[1];
                 if (!int.TryParse(first_port_str, out int first_port))
@@ -98,6 +101,20 @@ internal class GameStartManager
             return true;
         }
         return false;
+    }
+
+    public static void CheckProcesss()
+    {
+        List<Process> ToRemove = [];
+        foreach (var process in GameServerProcesses)
+        {
+            if (process.HasExited)
+                ToRemove.Add(process);
+        }
+        foreach (var process in ToRemove)
+        {
+            GameServerProcesses.Remove(process);
+        }
     }
 
     public static bool CheckIfPortAvailable(int port)
