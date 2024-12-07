@@ -1,12 +1,6 @@
 ﻿using EIV_Common;
 using LobbyLib.SocketControl;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static Godot.HttpRequest;
 
 namespace LobbyLib.Managers;
 
@@ -31,7 +25,6 @@ internal class GameStartManager
         if (!File.Exists(ServerPath))
             return (string.Empty, 0);
         string PortsAvailable = ConfigINI.Read("Config.ini", "GameServer", "PortsAvailable");
-        bool UseAsRange = ConfigINI.Read<bool>("Config.ini", "GameServer", "UseAsRange");
         if (!PortsAvailable.Contains(","))
         {
             // it doesnt have ports as a list. might be has 1 value?
@@ -42,16 +35,52 @@ internal class GameStartManager
             }
             if (!CheckIfPortAvailable(res))
             {
-                // port not avlbl. return nothing.
+                // port not Available. return nothing.
                 return (string.Empty, 0);
             }
             else
             {
                 StartGame(ServerPath, $"--map={map} --port={res}");
                 SockControl.StartServer(res, map);
+                return (ConfigINI.Read("Config.ini", "Lobby", "ServerAddress"), res);
             }
         }
-        // todo: make the ports read when in range and when it has more. thx
+        List<int> Ports = [];
+        foreach (var port in PortsAvailable.Split(","))
+        {
+            if (port.Contains("-"))
+            {
+                var split_port = port.Split("-");
+                var first_port_str = split_port[0];
+                var last_port_str = split_port[1];
+                if (!int.TryParse(first_port_str, out int first_port))
+                {
+                    continue;
+                }
+                if (!int.TryParse(last_port_str, out int last_port))
+                {
+                    continue;
+                }
+                Ports.AddRange(Enumerable.Range(first_port, last_port));
+            }
+
+            if (!int.TryParse(port, out int res))
+            {
+                continue;
+            }
+            Ports.Add(res);
+        }
+        foreach (var port in Ports)
+        {
+            if (!CheckIfPortAvailable(port))
+            {
+                continue;
+            }
+            StartGame(ServerPath, $"--map={map} --port={port}");
+            SockControl.StartServer(port, map);
+            return (ConfigINI.Read("Config.ini", "Lobby", "ServerAddress"), port);
+        }
+
         return (string.Empty, 0);
     }
 

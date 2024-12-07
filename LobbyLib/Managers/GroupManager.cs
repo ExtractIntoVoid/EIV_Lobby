@@ -42,7 +42,7 @@ public class GroupManager
                 InviteGroupResponse(data, socketStruct, ticket, clientSocketMessage);
                 return true;
             case ClientSocketEnum.GroupKick:
-                KickGroup(data, ticket, clientSocketMessage);
+                KickGroup(data, socketStruct, ticket, clientSocketMessage);
                 return true;
             default:
                 return false;
@@ -174,11 +174,11 @@ public class GroupManager
         {
             IsSuccess = true,
             ErrorCode = 0,
-            Message = "You are not the Group owner!",
+            Message = "Invite success!",
         });
     }
 
-    static void KickGroup(ReadOnlySpan<byte> data, TicketStruct ticket, ClientSocketMessage clientSocketMessage)
+    static void KickGroup(ReadOnlySpan<byte> data, WebSocketStruct socketStruct, TicketStruct ticket, ClientSocketMessage clientSocketMessage)
     {
         GroupKick? groupKick = JsonSerializer.Deserialize<GroupKick>(clientSocketMessage.JsonMessage);
         if (groupKick == null)
@@ -190,11 +190,22 @@ public class GroupManager
         }
         if (!Groups.Any(x => x.Owner == ticket.UserId && x.Id == groupKick.GroupId))
         {
-            // send back we cant. (We not an owner)
+            EIV_Lobby.SendResponse(socketStruct, new ClientSocketResponse()
+            {
+                IsSuccess = false,
+                ErrorCode = 2,
+                Message = "You are not the Group owner!",
+            });
             return;
         }
         webSocketStruct.SendWebSocketByteArray(data.ToArray());
         Groups.First(x => x.Owner == ticket.UserId).UserIds.Remove(groupKick.Invitee);
+        EIV_Lobby.SendResponse(socketStruct, new ClientSocketResponse()
+        {
+            IsSuccess = true,
+            ErrorCode = 0,
+            Message = "Invite success!",
+        });
     }
 }
 
