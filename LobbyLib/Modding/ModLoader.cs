@@ -148,15 +148,15 @@ public class ModLoader
             var item = ConvertHelper.ConvertFromString(File.ReadAllText(json));
             if (item != null)
             {
-                bool ret = Storage.Items.TryAdd(item.BaseID, item);
+                bool ret = Storage.Items.TryAdd(item.Id, item);
                 if (!ret)
                     continue;
                 if (JsonMods.ContainsKey(Dir))
                 {
-                    JsonMods[Dir].Add(item.BaseID);
+                    JsonMods[Dir].Add(item.Id);
                     continue;
                 }
-                JsonMods.Add(Dir, new() { item.BaseID });
+                JsonMods.Add(Dir, [item.Id]);
             }  
         }
     }
@@ -169,15 +169,15 @@ public class ModLoader
             var real_item = ConvertHelper.ConvertFromString(System.Text.Encoding.UTF8.GetString(reader.GetFileData(item)));
             if (real_item != null)
             {
-                bool ret = Storage.Items.TryAdd(real_item.BaseID, real_item);
+                bool ret = Storage.Items.TryAdd(real_item.Id, real_item);
                 if (!ret)
                     continue;
                 if (JsonMods.ContainsKey(filename))
                 {
-                    JsonMods[filename].Add(real_item.BaseID);
+                    JsonMods[filename].Add(real_item.Id);
                     continue;
                 }
-                JsonMods.Add(filename, new() { real_item.BaseID });
+                JsonMods.Add(filename, [real_item.Id]);
             }
         }
     }
