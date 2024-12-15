@@ -1,39 +1,26 @@
 ﻿using System.Reflection;
 using EIV_DataPack;
-using EIV_JsonLib;
-using EIV_JsonLib.Json;
 using EIV_Common;
 using EIV_Common.JsonStuff;
+using ModAPI;
 
 namespace LobbyLib.Modding;
 
 public class ModLoader
 {
-    public static Dictionary<string, ILobbyMod> Mods = [];
-    public static Dictionary<string, List<string>> JsonMods = [];
-    public static Dictionary<string, List<string>> ModsFiles = [];
+    public static Dictionary<string, ILobbyMod> LobbyMods = [];
     static bool IsLobbyModEnabled = true;
 
     public static void LoadMods()
     {
-        var EnableLobbyMods = ConfigINI.Read("Config.ini","Mod", "EnableLobbyMods");
-        if (!int.TryParse(EnableLobbyMods, out int i_EnableLobbyMods))
-        {
+        IsLobbyModEnabled = ConfigINI.Read<bool>("Config.ini","Mod", "EnableLobbyMods");
+        if (!IsLobbyModEnabled)
             return;
-        }
-        if (i_EnableLobbyMods == 0)
-        {
-            IsLobbyModEnabled = false;
-        }
-
+        ModManager.Init();
         string currdir = Directory.GetCurrentDirectory();
         LoadPackedMods(currdir);
-        var EnableLoadUnpackingMods = ConfigINI.Read("Config.ini", "Mod", "EnableLoadUnpackingMods");
-        if (!int.TryParse(EnableLoadUnpackingMods, out int i_EnableLoadUnpackingMods))
-        {
-            return;
-        }
-        if (i_EnableLoadUnpackingMods == 1)
+        var EnableLoadUnpackingMods = ConfigINI.Read<bool>("Config.ini", "Mod", "EnableLoadUnpackingMods");
+        if (EnableLoadUnpackingMods)
         {
             LoadUnpackedMods(currdir);
         }      
@@ -41,143 +28,84 @@ public class ModLoader
 
     public static void UnloadMods()
     {
-        foreach (var item in Mods)
+        ModManager.DeInit();
+        foreach (var item in LobbyMods)
         {
             item.Value.ShutDown();
         }
-        JsonMods.Clear();
-        Storage.Items.Clear();
+        LobbyMods.Clear();
+        Storage.ClearAll();
     }
-
-
 
     static void LoadPackedMods(string currdir)
     {
-        if (!Directory.Exists(Path.Combine(currdir, "Mods"))) { Directory.CreateDirectory(Path.Combine(currdir, "Mods")); }
+        if (!Directory.Exists(Path.Combine(currdir, "Mods")))
+            Directory.CreateDirectory(Path.Combine(currdir, "Mods"));
 
         foreach (var packedmods in Directory.GetFiles("Mods"))
         {
-            if (packedmods.Contains(".disabled"))
+            if (packedmods.Contains("disabled") || packedmods.Contains(".d"))
                 continue;
+
             var creator = DatapackCreator.Read(packedmods);
             var reader = creator.GetReader()!;
             reader.ReadFileNames();
-            ModsFiles.Add(packedmods.Replace("Mods" + Path.DirectorySeparatorChar, ""), reader.Pack.FileNames);
-            //reader.Pack.FileNames.ForEach(Console.WriteLine);
-            var deps = reader.Pack.FileNames.Where(x => x.Contains(".dll") && x.Contains("LobbyDependencies"));
-            foreach (var item in deps)
+            ModManager.LoadAssets_Pack(reader);
+
+            foreach (var item in reader.Pack.FileNames.Where(x => x.Contains(".dll") && x.Contains("LobbyDependencies")))
+                MainLoader.MainLoadContext.LoadFromStream(new MemoryStream(reader.GetFileData(item)));
+
+            foreach (var item in reader.Pack.FileNames.Where(x => x.Contains("*.dll")))
             {
-                AppDomain.CurrentDomain.Load(reader.GetFileData(item));
-            }
-            var lobbyMods = reader.Pack.FileNames.Where(x => x.Contains(".LobbyMod.dll"));
-            foreach (var item in lobbyMods)
-            {
-                var ass = AppDomain.CurrentDomain.Load(reader.GetFileData(item));
-                LoadJsonLibMod(ass);
+                var asm = MainLoader.MainLoadContext.LoadFromStream(new MemoryStream(reader.GetFileData(item)));
+                MainLoader.LoadMod(asm);
+                ModManager.LoadMod_JsonLib(asm);
                 if (IsLobbyModEnabled)
-                    LoadLobbyMod(ass);
+                    LoadLobbyMod(asm);
             }
-            LoadAssets_Pack(reader, packedmods);
             creator.Close();
         }
     }
 
     static void LoadUnpackedMods(string currdir)
     {
-        if (!Directory.Exists(Path.Combine(currdir, "UnpackedMods"))) { Directory.CreateDirectory(Path.Combine(currdir, "UnpackedMods")); }
+        if (!Directory.Exists(Path.Combine(currdir, "UnpackedMods")))
+            Directory.CreateDirectory(Path.Combine(currdir, "UnpackedMods"));
 
         foreach (var unpackedmods in Directory.GetDirectories("UnpackedMods"))
         {
-            if (unpackedmods.Contains(".disabled"))
+            // Disabled Unpacked Mods.
+            if (unpackedmods.Contains("disabled") || unpackedmods.Contains(".d"))
                 continue;
 
-            ModsFiles.Add(unpackedmods.Replace("UnpackedMods" + Path.DirectorySeparatorChar, "") + ".unpacked", Directory.GetFiles(unpackedmods, "*", SearchOption.AllDirectories).ToList());
-            if (Directory.Exists(Path.Combine(unpackedmods, "LobbyDependencies")))
+            ModManager.LoadAssets_Unpack(unpackedmods);
+            // Dependencies for Lobby.
+            MainLoader.LoadDependencies(Path.Combine(unpackedmods, "LobbyDependencies"));
+            MainLoader.LoadModInCustomDirectory(unpackedmods);
+
+            foreach (var LobbyMod in MainLoader.Mods)
+                ModManager.LoadMod_JsonLib(LobbyMod);
+
+            foreach (var LobbyMod in MainLoader.Mods.Where(x => x.FullName != null && x.FullName.Contains("Lobby")).ToList())
             {
-                foreach (var unpacked_dependency in Directory.GetFiles(Path.Combine(unpackedmods, "LobbyDependencies"), "*.dll"))
-                {
-                    AppDomain.CurrentDomain.Load(unpacked_dependency);
-                }
-            }
-            foreach (var LobbyMod in Directory.GetFiles(unpackedmods, "*.LobbyMod.dll"))
-            {
-                var ass = AppDomain.CurrentDomain.Load(File.ReadAllBytes(LobbyMod));
-                LoadJsonLibMod(ass);
                 if (IsLobbyModEnabled)
-                    LoadLobbyMod(ass);
+                    LoadLobbyMod(LobbyMod);
             }
-            LoadAssets_Unpack(unpackedmods);
         }
     }
 
-    static void LoadJsonLibMod(Assembly assembly)
+    public static void LoadLobbyMod(Assembly assembly)
     {
-        if (assembly.GetType("JsonLib_Mod.JsonLibConvert") == null)
-            return;
-
-        var jsonLib = (IJsonLibConverter?)Activator.CreateInstance(assembly.GetType("JsonLib_Mod.JsonLibConvert")!);
-        if (jsonLib == null)
-            return;
-
-        //Console.WriteLine("jsonLib converter added");
-        CoreConverters.Converters.Add(jsonLib);
-    }
-
-    static void LoadLobbyMod(Assembly assembly)
-    {
-        if (string.IsNullOrEmpty(assembly.FullName))
-            return;
-
-        if (assembly.GetType("LobbyMod.LobbyMod") == null)
-            return;
-
-        var jsonLib = (ILobbyMod?)Activator.CreateInstance(assembly.GetType("LobbyMod.LobbyMod")!);
-        if (jsonLib == null)
-            return;
-        jsonLib.Initialize();
-        Mods.Add(assembly.FullName, jsonLib);
-    }
-
-    static void LoadAssets_Unpack(string Dir)
-    {
-        if (!Directory.Exists(Path.Combine(Dir, "Assets", "Items")))
-            return;
-
-        foreach (var json in Directory.GetFiles(Path.Combine(Dir, "Assets", "Items"), "*.json", SearchOption.AllDirectories))
+        ModManager.LoadMod(typeof(ILobbyMod), assembly, Delegate);
+        void Delegate(Type? retType, object? obj)
         {
-            var item = ConvertHelper.ConvertFromString(File.ReadAllText(json));
-            if (item != null)
+            if (obj == null)
+                return;
+            ILobbyMod? lobbyMod = (ILobbyMod?)obj;
+            if (lobbyMod != null)
             {
-                bool ret = Storage.Items.TryAdd(item.Id, item);
-                if (!ret)
-                    continue;
-                if (JsonMods.ContainsKey(Dir))
-                {
-                    JsonMods[Dir].Add(item.Id);
-                    continue;
-                }
-                JsonMods.Add(Dir, [item.Id]);
-            }  
-        }
-    }
-
-    static void LoadAssets_Pack(DataPackReader reader, string filename)
-    {
-        var items = reader.Pack.FileNames.Where(x=>x.Contains(".json") && x.Contains("Assets/Items"));
-        foreach (var item in items)
-        {
-            var real_item = ConvertHelper.ConvertFromString(System.Text.Encoding.UTF8.GetString(reader.GetFileData(item)));
-            if (real_item != null)
-            {
-                bool ret = Storage.Items.TryAdd(real_item.Id, real_item);
-                if (!ret)
-                    continue;
-                if (JsonMods.ContainsKey(filename))
-                {
-                    JsonMods[filename].Add(real_item.Id);
-                    continue;
-                }
-                JsonMods.Add(filename, [real_item.Id]);
+                lobbyMod.Initialize();
+                LobbyMods.Add(assembly.FullName!, lobbyMod);
             }
         }
     }

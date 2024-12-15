@@ -1,5 +1,4 @@
-﻿using EIV_Common.Encryptions;
-using LobbyLib.Jsons;
+﻿using LobbyLib.Jsons;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -8,20 +7,19 @@ namespace LobbyLib.CustomTicket;
 
 public class TicketProcess
 {
-    static RsaService? Service;
+    static RSA? Rsa;
 
     public static void Start()
     {
-        var rsa = RSA.Create(2048);
+        Rsa = RSA.Create(2048);
         if (!File.Exists("rsa.xml"))
-            File.WriteAllText("rsa.xml", rsa.ToXmlString(true));
-        rsa.FromXmlString(File.ReadAllText("rsa.xml"));
-        Service = new RsaService(rsa);
+            File.WriteAllText("rsa.xml", Rsa.ToXmlString(true));
+        Rsa.FromXmlString(File.ReadAllText("rsa.xml"));
     }
 
     public static string CreateTicket(UserData data)
     {
-        if (Service == null)
+        if (Rsa == null)
             Start();
         TicketStruct ticketStruct = new()
         { 
@@ -33,12 +31,12 @@ public class TicketProcess
         };
         
         var ser = JsonSerializer.Serialize(ticketStruct);
-        return Convert.ToHexString(Service!.Encrypt(Encoding.Default.GetBytes(ser)));
+        return Convert.ToHexString(Rsa!.Encrypt(Encoding.Default.GetBytes(ser), RSAEncryptionPadding.Pkcs1));
     }
 
     public static TicketStruct? GetTicket(string ticketEnc)
     {
-        if (Service == null)
+        if (Rsa == null)
             Start();
         if (string.IsNullOrEmpty(ticketEnc))
             return null;
@@ -46,7 +44,7 @@ public class TicketProcess
         try
         {
             var hexed = Convert.FromHexString(ticketEnc);
-            var deced = Service!.Decrypt(hexed);
+            var deced = Rsa!.Decrypt(hexed, RSAEncryptionPadding.Pkcs1);
             var sered = Encoding.Default.GetString(deced);
             return JsonSerializer.Deserialize<TicketStruct>(sered);
         }
