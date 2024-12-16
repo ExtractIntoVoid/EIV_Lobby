@@ -5,6 +5,7 @@ using ModdableWebServer.Helper;
 using ModdableWebServer;
 using System.Text.Json;
 using EIV_JsonLib.Lobby;
+using LobbyLib.Modding;
 
 namespace LobbyLib.Web;
 
@@ -55,6 +56,9 @@ internal partial class EIV_Lobby
                 return;
             if (FriendManager.Manage(socketStruct, ticket, message.Enum, message))
                 return;
+            if (ItemActionManager.Manage(socketStruct, ticket, message.Enum, message))
+                return;
+
 
             switch (message.Enum)
             {
@@ -63,6 +67,11 @@ internal partial class EIV_Lobby
                     break;
                 default:
                     break;
+            }
+
+            foreach (var item in ModLoader.LobbyMods.Values)
+            {
+                item.ClientEvent(data, socketStruct, ticket, message.Enum, message);
             }
         }
         catch

@@ -1,5 +1,9 @@
-﻿using EIV_JsonLib.Extension;
+﻿using EIV_Common;
+using EIV_Common.JsonStuff;
+using EIV_Common.Platform;
+using EIV_JsonLib.Extension;
 using LobbyLib.CustomTicket;
+using LobbyLib.Jsons;
 using ModdableWebServer;
 using ModdableWebServer.Attributes;
 using ModdableWebServer.Helper;
@@ -35,12 +39,9 @@ internal partial class EIV_Lobby
             { 
                 UserId = ticketstruct.Value.Id,
                 Inventory = new()
-                {
-
-                }
             };
-            // TODO: Use EIV_Common Storage to fill this!.
-
+            if (Storage.Inventories.TryGetValue(ConfigINI.Read("Config.ini", "Default", "DefaultInventoryName"), out var out_inventory))
+                inventory.Inventory = out_inventory;
             MainControl.Database.SaveInventory(inventory);
         }
         serverStruct.Response.MakeGetResponse(inventory.Inventory.Serialize());
@@ -67,17 +68,14 @@ internal partial class EIV_Lobby
         var stash = MainControl.Database.GetStashInventory(ticketstruct.Value.Id);
         if (stash == null)
         {
-            // create inventory
+            // create stash
             stash = new()
             {
                 UserId = ticketstruct.Value.Id,
                 Stash = new()
-                {
-
-                }
             };
-            // TODO: Use EIV_Common Storage to fill this!.
-
+            if (Storage.Stashes.TryGetValue(ConfigINI.Read("Config.ini", "Default", "DefaultStashName"), out var out_stash))
+                stash.Stash = out_stash;
             MainControl.Database.SaveStashInventory(stash);
         }
         serverStruct.Response.MakeGetResponse(stash.Stash.Serialize());

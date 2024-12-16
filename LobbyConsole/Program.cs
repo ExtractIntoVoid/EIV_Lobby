@@ -11,7 +11,8 @@ internal class Program
             Console.WriteLine("Creating Lobby Server failed!");
             return;
         }
-        string? req = Console.ReadLine();
+        Console.WriteLine("Type 'quit', 'q' or 'exit' to quit shutdown the server.");
+        string? req = "";
         while (req != "quit" && req != "q" && req != "exit")
             req = Console.ReadLine();
         MainControl.Stop();

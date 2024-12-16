@@ -1,4 +1,5 @@
-﻿using ModdableWebServer.Attributes;
+﻿using EIV_Common;
+using ModdableWebServer.Attributes;
 using ModdableWebServer.Helper;
 using ModdableWebServer.Servers;
 using NetCoreServer;
@@ -30,9 +31,9 @@ public class ServerManager
             SslContext? context = null;
 
             if (IsCertValidate)
-                context = CertHelper.GetContextNoValidate(System.Security.Authentication.SslProtocols.Tls12, "cert/certificate.pfx", "SlejmUr");
+                context = CertHelper.GetContextNoValidate(System.Security.Authentication.SslProtocols.Tls12, ConfigINI.Read("config.ini", "Lobby", "PfxPath"), ConfigINI.Read("config.ini", "Lobby", "PfxPasword"));
             else
-                context = CertHelper.GetContext(System.Security.Authentication.SslProtocols.Tls12, "cert/certificate.pfx", "SlejmUr");
+                context = CertHelper.GetContext(System.Security.Authentication.SslProtocols.Tls12, ConfigINI.Read("config.ini", "Lobby", "PfxPath"), ConfigINI.Read("config.ini", "Lobby", "PfxPasword"));
             WSS_Server = new(context, ip, port);
 
             Main_HTTP = AttributeMethodHelper.UrlHTTPLoader(ServerManagerAssembly);
@@ -55,7 +56,7 @@ public class ServerManager
             WS_Server.Start();
         }
         IpPort = ssl ? $"https://{ip}:{port}/" : $"http://{ip}:{port}/";
-        IpPort_WS = ssl ? $"wss://{ip}:{port}/socket/" : $"ws://{ip}:{port}/socket/";
+        IpPort_WS = ssl ? $"wss://{ip}:{port}/" : $"ws://{ip}:{port}/";
         IP = $"{ip}:{port}";
         Console.WriteLine("Server started on " + IpPort + " | " + IpPort_WS);
 

@@ -1,5 +1,6 @@
 ﻿using EIV_Common;
 using EIV_Common.Coroutines;
+using EIV_Common.Logger;
 using LobbyLib.Database;
 using LobbyLib.Managers;
 using LobbyLib.Modding;
@@ -32,6 +33,12 @@ public class MainControl
         bool ssl = ConfigINI.Read<bool>("Config.ini", "Lobby", "SSL");
         string Ip = ConfigINI.Read("Config.ini", "Lobby", "ServerAddress");
         ushort port = ConfigINI.Read<ushort>("Config.ini", "Lobby", "ServerPort");
+
+        if (ssl && string.IsNullOrEmpty(ConfigINI.Read("config.ini", "Lobby", "PfxPath")) && string.IsNullOrEmpty(ConfigINI.Read("config.ini", "Lobby", "PfxPasword")))
+        {
+            Console.WriteLine("PfxPath and PfxPassword not declared, SSL is disabled.");
+            ssl = false;
+        }
         if (ssl)
         {
             string _ip_port = $"https://{Ip}:{port}";
@@ -60,9 +67,6 @@ public class MainControl
             /* //Temp disable.
             case 1:
                 Database = new LiteDB_Database();
-                break;
-            case 2:
-                Database = new MySQL_Database();
                 break;
             */
             default:

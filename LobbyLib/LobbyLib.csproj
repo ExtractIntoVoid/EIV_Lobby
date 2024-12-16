@@ -7,14 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="EIV_Common" Version="0.0.1.7" />
+    <PackageReference Include="EIV_Common" Version="0.0.1.8" />
     <PackageReference Include="EIV_DataPack" Version="1.0.3.1" />
     <PackageReference Include="EIV_JsonLib" Version="2.0.4.1" />
     <PackageReference Include="ini-parser-netstandard" Version="2.5.2" />
     <PackageReference Include="LiteDB" Version="5.0.21" />
     <PackageReference Include="ModAPI" Version="0.0.2.1" />
     <PackageReference Include="ModdableWebServer" Version="1.5.0" />
-    <PackageReference Include="MySqlConnector" Version="2.4.0" />
     <PackageReference Include="SemanticVersioning" Version="2.0.2" />
   </ItemGroup>
 

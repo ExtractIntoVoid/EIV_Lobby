@@ -7,6 +7,8 @@ using EIV_Common.InfoJson;
 using EIV_Common;
 using EIV_JsonLib.Lobby;
 using LobbyLib.CustomTicket;
+using EIV_Common.JsonStuff;
+using LobbyLib.Jsons;
 
 namespace LobbyLib.Web;
 
@@ -31,8 +33,10 @@ internal partial class EIV_Lobby
             return true;
         }
 
-        // Simple version check. PLEASE REPLACE WITH NORMAL ONE!
-        if (userinfo.Version != ConfigINI.Read("Lobby.ini", "Lobby", "Version"))
+        var range = SemanticVersioning.Range.Parse(ConfigINI.Read("Lobby.ini", "Lobby", "Version"));
+        var version = SemanticVersioning.Version.Parse(userinfo.Version);
+
+        if (!range.IsSatisfied(version, true))
         {
             serverStruct.Response.MakeErrorResponse("VersionCheck");
             serverStruct.SendResponse();
@@ -52,8 +56,25 @@ internal partial class EIV_Lobby
                 FriendRequests = [],
             };
             MainControl.Database.SaveUserData(user);
+            // create stash
+            StashInventory stash = new()
+            {
+                UserId = user.Id,
+                Stash = new()
+            };
+            if (Storage.Stashes.TryGetValue(ConfigINI.Read("Config.ini", "Default", "DefaultStashName"), out var out_stash))
+                stash.Stash = out_stash;
+            MainControl.Database.SaveStashInventory(stash);
 
-            // TODO: Create a new save file.
+            UserInventory inventory = new()
+            {
+                UserId = user.Id,
+                Inventory = new()
+            };
+            if (Storage.Inventories.TryGetValue(ConfigINI.Read("Config.ini", "Default", "DefaultInventoryName"), out var out_inventory))
+                inventory.Inventory = out_inventory;
+            MainControl.Database.SaveInventory(inventory);
+
         }
         var ticket = TicketProcess.CreateTicket(user);
 
