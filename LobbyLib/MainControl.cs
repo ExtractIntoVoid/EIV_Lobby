@@ -1,6 +1,5 @@
 ﻿using EIV_Common;
 using EIV_Common.Coroutines;
-using EIV_Common.Logger;
 using LobbyLib.Database;
 using LobbyLib.Managers;
 using LobbyLib.Modding;
@@ -10,8 +9,8 @@ namespace LobbyLib;
 
 public class MainControl
 {
-    static Coroutine? QueueRunner;
-    static Coroutine? ProcessRunner;
+    static CoroutineHandle? QueueRunner;
+    static CoroutineHandle? ProcessRunner;
     public static bool IsAlreadyQuited { get; internal set; } = false;
     public static string IP { get; internal set; } = "https://127.0.0.1:7777";
     public static string Ip_Port { get; internal set; } = "127.0.0.1:7777";
@@ -23,7 +22,7 @@ public class MainControl
     public static bool InitAll()
     {
         // Init custom coroutine. not doing much but we need later on.
-        CoroutineWorkerCustom.KillCoroutines();
+        CoroutineWorkerCustom.HasAnyCoroutines();
         // ini check
         if (!File.Exists("Config.ini"))
         {

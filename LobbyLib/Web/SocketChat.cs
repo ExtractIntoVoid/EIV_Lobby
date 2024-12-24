@@ -32,7 +32,7 @@ internal partial class EIV_Lobby
         if (socketStruct.WSRequest != null)
         {
             ReadOnlySpan<byte> data = socketStruct.WSRequest.Value.buffer.Skip((int)socketStruct.WSRequest.Value.offset).Take((int)socketStruct.WSRequest.Value.size).ToArray();
-            ControlChat(data, socketStruct, ticketstruct.Value);
+            ControlChat(data, socketStruct);
         }
         if (socketStruct.IsConnected)
         {
@@ -44,7 +44,7 @@ internal partial class EIV_Lobby
         }
     }
 
-    public static void ControlChat(ReadOnlySpan<byte> data, WebSocketStruct socketStruct, TicketStruct ticketStruct)
+    public static void ControlChat(ReadOnlySpan<byte> data, WebSocketStruct socketStruct)
     {
 
         try

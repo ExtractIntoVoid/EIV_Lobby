@@ -30,14 +30,14 @@ public class ModDownloadManager
     public static byte[] GetFile(string build, string file)
     {
         if (string.IsNullOrEmpty(build) || string.IsNullOrEmpty(file))
-            return Array.Empty<byte>();
+            return [];
 
         // we skip if we dont recoginse it
         if (build != "client" && build != "server" && build != "game")
-            return Array.Empty<byte>();
+            return [];
         var modfile = Path.Combine(Directory.GetCurrentDirectory(), $"{build}_mods", file);
         if (!File.Exists(modfile))
-            return Array.Empty<byte>();
+            return [];
         return File.ReadAllBytes(modfile);
     }
 }
