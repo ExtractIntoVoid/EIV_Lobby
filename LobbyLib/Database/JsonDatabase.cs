@@ -19,7 +19,7 @@ internal class JsonDatabase : IDatabase
             Directory.CreateDirectory(dirname);
     }
     #region Inventory
-    public void SaveInventory(UserInventory inventory)
+    public void SaveProfile(UserProfile inventory)
     {
         Create();
         var json = Path.Combine(dir_path, inventory.UserId.ToString().Replace("-", "_"), "Inventory.json");
@@ -27,16 +27,16 @@ internal class JsonDatabase : IDatabase
         File.WriteAllText(json, JsonSerializer.Serialize(inventory, ConvertHelper.GetSerializerSettings()));
     }
 
-    public UserInventory? GetInventory(Guid Id)
+    public UserProfile? GetProfile(Guid Id)
     {
         Create();
         var json = Path.Combine(dir_path, Id.ToString().Replace("-", "_"), "Inventory.json");
         if (!File.Exists(json))
             return null;
-        return JsonSerializer.Deserialize<UserInventory>(File.ReadAllText(json), ConvertHelper.GetSerializerSettings());
+        return JsonSerializer.Deserialize<UserProfile>(File.ReadAllText(json), ConvertHelper.GetSerializerSettings());
     }
 
-    public void DeleteInventory(Guid Id)
+    public void DeleteProfile(Guid Id)
     {
         var json = Path.Combine(dir_path, Id.ToString().Replace("-", "_"), "Inventory.json");
         if (File.Exists(json))

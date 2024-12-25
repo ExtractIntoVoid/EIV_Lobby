@@ -66,25 +66,37 @@ internal partial class EIV_Lobby
                 stash.Stash = out_stash;
             MainControl.Database.SaveStashInventory(stash);
 
-            UserInventory inventory = new()
+            UserProfile profile = new()
             {
                 UserId = user.Id,
-                Inventory = new()
+                Character = new()
+                {
+                    Name = user.Name,
+                    CreationDate = DateTime.Now,
+                    Inventory = new(),
+                    Modules = new(),
+                    Origin = string.Empty,
+                }
             };
+            string origin = ConfigINI.Read("Config.ini", "Default", "DefaultOrigin");
+            //  Additional Datas must be "Key1=Value1;Key2=Value2".
+            if (userinfo.AdditionalData.Contains("origin"))
+            {
+                origin = userinfo.AdditionalData.Split("origin=")[1].Split(";")[0];
+            }
+
             if (Storage.Inventories.TryGetValue(ConfigINI.Read("Config.ini", "Default", "DefaultInventoryName"), out var out_inventory))
-                inventory.Inventory = out_inventory;
-            MainControl.Database.SaveInventory(inventory);
+                profile.Character.Inventory = out_inventory;
+            if (Storage.OriginToModules.TryGetValue(origin, out var out_modules))
+                profile.Character.Modules = out_modules;
+            MainControl.Database.SaveProfile(profile);
 
         }
-        var ticket = TicketProcess.CreateTicket(user);
-
-        ConnectResponse connectResponse = new()
-        { 
+        serverStruct.Response.MakeGetResponse(JsonSerializer.Serialize(new ConnectResponse()
+        {
             Id = user.Id,
-            Ticket = ticket,
-        };
-
-        serverStruct.Response.MakeGetResponse(JsonSerializer.Serialize(connectResponse));
+            Ticket = TicketProcess.CreateTicket(user),
+        }));
         serverStruct.SendResponse();
         return true;
     }

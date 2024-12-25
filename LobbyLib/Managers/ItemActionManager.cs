@@ -49,104 +49,9 @@ public class ItemActionManager
             MainControl.Database.SaveStashInventory(stash);
             return;
         }
-        var inv = MainControl.Database.GetInventory(ticket.Id);
+        var inv = MainControl.Database.GetProfile(ticket.Id);
         if (inv == null)
             return;
-        if (inv.Inventory.Items.Remove(discard.ItemToDiscard))
-        {
-            EIV_Lobby.SendResponse(socketStruct, new ClientSocketResponse()
-            {
-                IsSuccess = true,
-                ErrorCode = 0,
-                Message = "Item succesfully discarded!",
-            });
-            MainControl.Database.SaveInventory(inv);
-            return;
-        }
-        // pain checks.
-        if (inv.Inventory.Backpack == discard.ItemToDiscard)
-        {
-            inv.Inventory.Backpack = null;
-            EIV_Lobby.SendResponse(socketStruct, new ClientSocketResponse()
-            {
-                IsSuccess = true,
-                ErrorCode = 0,
-                Message = "Item succesfully discarded!",
-            });
-            MainControl.Database.SaveInventory(inv);
-            return;
-        }
-        if (inv.Inventory.Backpack != null && inv.Inventory.Backpack.Items.Remove(discard.ItemToDiscard))
-        {
-            EIV_Lobby.SendResponse(socketStruct, new ClientSocketResponse()
-            {
-                IsSuccess = true,
-                ErrorCode = 0,
-                Message = "Item succesfully discarded!",
-            });
-            MainControl.Database.SaveInventory(inv);
-            return;
-        }
-        if (inv.Inventory.Hand == discard.ItemToDiscard)
-        {
-            inv.Inventory.Hand = null;
-            EIV_Lobby.SendResponse(socketStruct, new ClientSocketResponse()
-            {
-                IsSuccess = true,
-                ErrorCode = 0,
-                Message = "Item succesfully discarded!",
-            });
-            MainControl.Database.SaveInventory(inv);
-            return;
-        }
-        if (inv.Inventory.MeleeSlot == discard.ItemToDiscard)
-        {
-            inv.Inventory.MeleeSlot = null;
-            EIV_Lobby.SendResponse(socketStruct, new ClientSocketResponse()
-            {
-                IsSuccess = true,
-                ErrorCode = 0,
-                Message = "Item succesfully discarded!",
-            });
-            MainControl.Database.SaveInventory(inv);
-            return;
-        }
-        if (inv.Inventory.Primary == discard.ItemToDiscard)
-        {
-            inv.Inventory.Primary = null;
-            EIV_Lobby.SendResponse(socketStruct, new ClientSocketResponse()
-            {
-                IsSuccess = true,
-                ErrorCode = 0,
-                Message = "Item succesfully discarded!",
-            });
-            MainControl.Database.SaveInventory(inv);
-            return;
-        }
-        if (inv.Inventory.Secondary == discard.ItemToDiscard)
-        {
-            inv.Inventory.Secondary = null;
-            EIV_Lobby.SendResponse(socketStruct, new ClientSocketResponse()
-            {
-                IsSuccess = true,
-                ErrorCode = 0,
-                Message = "Item succesfully discarded!",
-            });
-            MainControl.Database.SaveInventory(inv);
-            return;
-        }
-        if (discard.ItemToDiscard is CoreArmor armor && armor != null && inv.Inventory.Armors.Remove(armor))
-        {
-            EIV_Lobby.SendResponse(socketStruct, new ClientSocketResponse()
-            {
-                IsSuccess = true,
-                ErrorCode = 0,
-                Message = "Item succesfully discarded!",
-            });
-            MainControl.Database.SaveInventory(inv);
-            return;
-        }
-
     }
 
     public static void MoveItem(WebSocketStruct socketStruct, TicketStruct ticket, ClientSocketMessage clientSocketMessage)
@@ -161,9 +66,11 @@ public class ItemActionManager
         if (string.IsNullOrEmpty(place)) 
             return false;
 
-        if (place == "stash" || place == "backpack")
-            return true;
-
-        return false;
+        return 
+            place == "stash" ||
+            place == "backpack" ||
+            place == "hand" ||
+            place == "toolbelt" ||
+            place == "wearable_item";
     }
 }

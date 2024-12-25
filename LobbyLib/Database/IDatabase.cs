@@ -6,10 +6,10 @@ public interface IDatabase
 {
     public void Create();
 
-    // Inventory
-    public void SaveInventory(UserInventory inventory);
-    public UserInventory? GetInventory(Guid Id);
-    public void DeleteInventory(Guid Id);
+    // Profile
+    public void SaveProfile(UserProfile profile);
+    public UserProfile? GetProfile(Guid Id);
+    public void DeleteProfile(Guid Id);
 
     // Stash
 

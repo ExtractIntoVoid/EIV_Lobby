@@ -10,7 +10,7 @@ internal class LiteDB_Database : IDatabase
         
     }
 
-    public void DeleteInventory(Guid Id)
+    public void DeleteProfile(Guid Id)
     {
         
     }
@@ -24,7 +24,7 @@ internal class LiteDB_Database : IDatabase
     {
         
     }
-    public UserInventory? GetInventory(Guid Id)
+    public UserProfile? GetProfile(Guid Id)
     {
         return null;
     }
@@ -44,7 +44,7 @@ internal class LiteDB_Database : IDatabase
     }
 
 
-    public void SaveInventory(UserInventory inventory)
+    public void SaveProfile(UserProfile inventory)
     {
         
     }

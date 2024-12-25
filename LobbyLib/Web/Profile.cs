@@ -1,9 +1,7 @@
 ﻿using EIV_Common;
 using EIV_Common.JsonStuff;
-using EIV_Common.Platform;
 using EIV_JsonLib.Extension;
 using LobbyLib.CustomTicket;
-using LobbyLib.Jsons;
 using ModdableWebServer;
 using ModdableWebServer.Attributes;
 using ModdableWebServer.Helper;
@@ -13,6 +11,49 @@ namespace LobbyLib.Web;
 
 internal partial class EIV_Lobby
 {
+
+    [HTTP("GET", "/EIV_Lobby/Profile/Character")]
+    public static bool ProfileCharacter(HttpRequest _, ServerStruct serverStruct)
+    {
+        if (!serverStruct.Headers.TryGetValue("authorization", out var ticket))
+        {
+            serverStruct.Response.MakeErrorResponse(401, "Authorization is not found!");
+            serverStruct.SendResponse();
+            return true;
+        }
+        var ticketstruct = TicketProcess.GetTicket(ticket);
+        if (!ticketstruct.HasValue)
+        {
+            serverStruct.Response.MakeErrorResponse(401, "Wrong ticket!");
+            serverStruct.SendResponse();
+            return true;
+        }
+
+        var profile = MainControl.Database.GetProfile(ticketstruct.Value.Id);
+        if (profile == null)
+        {
+            profile = new()
+            { 
+                UserId = ticketstruct.Value.Id,
+                Character = new()
+                {
+                    Name = ticketstruct.Value.Name,
+                    CreationDate = DateTime.Now,
+                    Inventory = new(),
+                    Modules = new(),
+                    Origin = string.Empty
+                }
+            };
+            if (Storage.Inventories.TryGetValue(ConfigINI.Read("Config.ini", "Default", "DefaultInventoryName"), out var out_inventory))
+                profile.Character.Inventory = out_inventory;
+            if (Storage.OriginToModules.TryGetValue(ConfigINI.Read("Config.ini", "Default", "DefaultOrigin"), out var out_modules))
+                profile.Character.Modules = out_modules;
+            MainControl.Database.SaveProfile(profile);
+        }
+        serverStruct.Response.MakeGetResponse(profile.Character.Serialize());
+        serverStruct.SendResponse();
+        return true;
+    }
 
     [HTTP("GET", "/EIV_Lobby/Profile/Inventory")]
     public static bool ProfileInventory(HttpRequest _, ServerStruct serverStruct)
@@ -31,20 +72,28 @@ internal partial class EIV_Lobby
             return true;
         }
 
-        var inventory = MainControl.Database.GetInventory(ticketstruct.Value.Id);
-        if (inventory == null)
+        var profile = MainControl.Database.GetProfile(ticketstruct.Value.Id);
+        if (profile == null)
         {
-            // create inventory
-            inventory = new()
-            { 
+            profile = new()
+            {
                 UserId = ticketstruct.Value.Id,
-                Inventory = new()
+                Character = new()
+                {
+                    Name = ticketstruct.Value.Name,
+                    CreationDate = DateTime.Now,
+                    Inventory = new(),
+                    Modules = new(),
+                    Origin = string.Empty
+                }
             };
             if (Storage.Inventories.TryGetValue(ConfigINI.Read("Config.ini", "Default", "DefaultInventoryName"), out var out_inventory))
-                inventory.Inventory = out_inventory;
-            MainControl.Database.SaveInventory(inventory);
+                profile.Character.Inventory = out_inventory;
+            if (Storage.OriginToModules.TryGetValue(ConfigINI.Read("Config.ini", "Default", "DefaultOrigin"), out var out_modules))
+                profile.Character.Modules = out_modules;
+            MainControl.Database.SaveProfile(profile);
         }
-        serverStruct.Response.MakeGetResponse(inventory.Inventory.Serialize());
+        serverStruct.Response.MakeGetResponse(profile.Character.Inventory.Serialize());
         serverStruct.SendResponse();
         return true;
     }
