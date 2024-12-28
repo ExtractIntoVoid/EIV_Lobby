@@ -12,7 +12,7 @@ namespace LobbyLib.Web;
 internal partial class EIV_Lobby
 {
 
-    [HTTP("GET", "/EIV_Lobby/Profile/Character")]
+    [HTTP("GET", "/Profile/Character")]
     public static bool ProfileCharacter(HttpRequest _, ServerStruct serverStruct)
     {
         if (!serverStruct.Headers.TryGetValue("authorization", out var ticket))
@@ -55,7 +55,7 @@ internal partial class EIV_Lobby
         return true;
     }
 
-    [HTTP("GET", "/EIV_Lobby/Profile/Inventory")]
+    [HTTP("GET", "/Profile/Inventory")]
     public static bool ProfileInventory(HttpRequest _, ServerStruct serverStruct)
     {
         if (!serverStruct.Headers.TryGetValue("authorization", out var ticket))
@@ -98,7 +98,7 @@ internal partial class EIV_Lobby
         return true;
     }
 
-    [HTTP("GET", "/EIV_Lobby/Profile/Stash")]
+    [HTTP("GET", "/Profile/Stash")]
     public static bool ProfileStash(HttpRequest _, ServerStruct serverStruct)
     {
         if (!serverStruct.Headers.TryGetValue("authorization", out var ticket))

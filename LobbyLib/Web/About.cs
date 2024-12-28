@@ -10,7 +10,7 @@ namespace LobbyLib.Web;
 
 internal partial class EIV_Lobby
 {
-    [HTTP("GET", "/EIV_Lobby/About")]
+    [HTTP("GET", "/About")]
     public static bool LobbyAbout(HttpRequest _, ServerStruct serverStruct)
     {
         ServerInfoJson serverInfoJSON = new()

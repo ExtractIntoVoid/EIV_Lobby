@@ -9,7 +9,7 @@ namespace LobbyLib.Web;
 internal partial class EIV_Lobby
 {
 
-    [HTTP("GET", "/EIV_Lobby/Files/{build}/Mods/{modpath}")]
+    [HTTP("GET", "/Files/{build}/Mods/{modpath}")]
     public static bool FilesMods(HttpRequest request, ServerStruct serverStruct)
     {
         string build = serverStruct.Parameters["build"];

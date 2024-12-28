@@ -15,7 +15,7 @@ namespace LobbyLib.Web;
 internal partial class EIV_Lobby
 {
     
-    [HTTP("POST", "/EIV_Lobby/Connect")]
+    [HTTP("POST", "/Connect")]
     public static bool LobbyConnect(HttpRequest request, ServerStruct serverStruct)
     {
         if (string.IsNullOrEmpty(request.Body))

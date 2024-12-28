@@ -12,7 +12,7 @@ internal partial class EIV_Lobby
 {
     public static Dictionary<TicketStruct, WebSocketStruct> ChatUserToWS = [];
 
-    [WS("/EIV_Lobby/Socket/Chat")]
+    [WS("/Socket/Chat")]
     public static void SocketChat(WebSocketStruct socketStruct)
     {
         if (!socketStruct.Request.Headers.TryGetValue("authorization", out var ticket))

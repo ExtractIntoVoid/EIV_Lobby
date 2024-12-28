@@ -1,21 +1,17 @@
-                 
+/Connect - Connecting to Lobby Server. (Getting custom related IDs, hashes, etc.)
+/Disconnect - Disconnecting from Lobby Server.
 
-/EIV_Lobby/
+/About - About this Lobby Server.
 
-Connect - Connecting to Lobby Server. (Getting custom related IDs, hashes, etc.)
-Disconnect - Disconnecting from Lobby Server.
+/Socket/Chat - Websocket for chat
+/Socket/Client/{GUID} - Websocket for mostly that doesnt need HTTP (Matchmake, friend system?, groups, Item manipulation. (Mainly Stash Moving, and onto a character)
 
-About - About this Lobby Server.
+/Profile/Character - Get our character data.
+/Profile/Inventory - Get our character inventory.
+/Profile/Stash - Get our stash inventory
 
-Socket/Chat - Websocket for chat
-Socket/Client/{GUID} - Websocket for mostly that doesnt need HTTP (Matchmake, friend system?, groups, Item manipulation. (Mainly Stash Moving, and onto a character)
-
-Profile/Character - Get our character data.
-Profile/Inventory - Get our character inventory.
-Profile/Stash - Get our stash inventory
-
-Files/Client/Mods/{Modpath}
-Files/Server/Mods/{Modpath}
+/Files/Client/Mods/{Modpath}
+/Files/Server/Mods/{Modpath}
 
 - 
 Game connect to this Lobby with Socket Server "Mod".
