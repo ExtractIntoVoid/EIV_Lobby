@@ -1,4 +1,4 @@
-﻿using LobbyLib.Jsons;
+﻿using LobbyLib.Models;
 using EIV_JsonLib.Json;
 using System.Text.Json;
 

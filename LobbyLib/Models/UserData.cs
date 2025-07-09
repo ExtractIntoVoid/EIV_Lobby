@@ -1,6 +1,6 @@
 ﻿using EIV_JsonLib.Lobby;
 
-namespace LobbyLib.Jsons;
+namespace LobbyLib.Models;
 
 public class UserData
 {

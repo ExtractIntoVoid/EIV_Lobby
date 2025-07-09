@@ -21,7 +21,7 @@ internal partial class EIV_Lobby
             socketStruct.SendWebSocketClose(401, "Authorization is not found!");
             return;
         }
-        var ticketstruct = TicketProcess.GetTicket(ticket);
+        var ticketstruct = TicketManager.GetTicket(ticket);
         if (ticketstruct == null)
         {
             socketStruct.SendWebSocketClose(401, "wrong ticket!");

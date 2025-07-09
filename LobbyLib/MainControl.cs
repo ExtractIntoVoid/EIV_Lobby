@@ -29,7 +29,7 @@ public class MainControl
             File.WriteAllText("Config.ini", LobbyLib_Res.Config);
         }
 
-        bool ssl = ConfigINI.Read<bool>("Config.ini", "Lobby", "SSL");
+        bool ssl = ConfigINI.Read<bool>("Config.ini", "Lobby", "EnableSSL");
         string Ip = ConfigINI.Read("Config.ini", "Lobby", "ServerAddress");
         ushort port = ConfigINI.Read<ushort>("Config.ini", "Lobby", "ServerPort");
 
@@ -38,26 +38,14 @@ public class MainControl
             Console.WriteLine("PfxPath and PfxPassword not declared, SSL is disabled.");
             ssl = false;
         }
-        if (ssl)
-        {
-            string _ip_port = $"https://{Ip}:{port}";
-            IP = _ip_port;
-            Ip_Port = $"{Ip}:{port}";
-        }
-        else
-        {
-            string _ip_port = $"http://{Ip}:{port}";
-            IP = _ip_port;
-            Ip_Port = $"{Ip}:{port}";
-        }
+        IP = $"http{(ssl ? "s" : string.Empty)}://{Ip}:{port}";
+        Ip_Port = $"{Ip}:{port}";
         ServerManager.Start(Ip, port, ssl);
 
         // DatabaseType
         var databaseType = ConfigINI.Read("Config.ini","Database", "DatabaseType");
         if (!int.TryParse(databaseType, out int db_Type))
-        {
             return false;
-        }
         switch (db_Type)
         {
             case 0:

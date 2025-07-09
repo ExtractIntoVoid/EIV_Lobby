@@ -21,7 +21,7 @@ internal partial class EIV_Lobby
             serverStruct.SendResponse();
             return true;
         }
-        var ticketstruct = TicketProcess.GetTicket(ticket);
+        var ticketstruct = TicketManager.GetTicket(ticket);
         if (!ticketstruct.HasValue)
         {
             serverStruct.Response.MakeErrorResponse(401, "Wrong ticket!");
@@ -64,7 +64,7 @@ internal partial class EIV_Lobby
             serverStruct.SendResponse();
             return true;
         }
-        var ticketstruct = TicketProcess.GetTicket(ticket);
+        var ticketstruct = TicketManager.GetTicket(ticket);
         if (!ticketstruct.HasValue)
         {
             serverStruct.Response.MakeErrorResponse(401, "Wrong ticket!");
@@ -107,7 +107,7 @@ internal partial class EIV_Lobby
             serverStruct.SendResponse();
             return true;
         }
-        var ticketstruct = TicketProcess.GetTicket(ticket);
+        var ticketstruct = TicketManager.GetTicket(ticket);
         if (ticketstruct == null)
         {
             serverStruct.Response.MakeErrorResponse(401, "Wrong ticket!");

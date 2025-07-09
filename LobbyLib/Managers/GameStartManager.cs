@@ -17,7 +17,7 @@ internal class GameStartManager
         {
             // no host should disable auto hosting.
             // that means every mod should load then we get a list for maps, then sync and quit.
-            StartGame(ServerPath, "--nohost");
+            StartGame(ServerPath, "--nohost --syncmap --quit");
         }
     }
     public static (string ip, int port) StartGameServer(string map)
@@ -44,7 +44,7 @@ internal class GameStartManager
             else
             {
                 StartGame(ServerPath, $"--map={map} --port={res}");
-                SockControl.StartServer(res, map);
+                SockControl.StartServer(res);
                 return (ConfigINI.Read("Config.ini", "Lobby", "ServerAddress"), res);
             }
         }
@@ -80,7 +80,7 @@ internal class GameStartManager
                 continue;
             }
             StartGame(ServerPath, $"--map={map} --port={port}");
-            SockControl.StartServer(port, map);
+            SockControl.StartServer(port);
             return (ConfigINI.Read("Config.ini", "Lobby", "ServerAddress"), port);
         }
 

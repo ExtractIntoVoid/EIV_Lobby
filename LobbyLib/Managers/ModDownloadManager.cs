@@ -2,13 +2,15 @@
 
 public class ModDownloadManager
 {
+    private static List<string> buildNames = ["client", "server", "game"];
+
     public static string GetModsTxt(string build)
     {
         if (string.IsNullOrEmpty(build))
             return string.Empty;
 
         // we skip if we dont recoginse it
-        if (build != "client" && build != "server" && build != "game")
+        if (!buildNames.Contains(build))
             return string.Empty;
 
         if (!Directory.Exists($"{build}_mods"))
@@ -33,7 +35,7 @@ public class ModDownloadManager
             return [];
 
         // we skip if we dont recoginse it
-        if (build != "client" && build != "server" && build != "game")
+        if (!buildNames.Contains(build))
             return [];
         var modfile = Path.Combine(Directory.GetCurrentDirectory(), $"{build}_mods", file);
         if (!File.Exists(modfile))

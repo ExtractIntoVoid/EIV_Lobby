@@ -1,6 +1,6 @@
 ﻿using EIV_JsonLib.Profile;
 
-namespace LobbyLib.Jsons;
+namespace LobbyLib.Models;
 
 public class UserProfile
 {

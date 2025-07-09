@@ -8,7 +8,7 @@ using EIV_Common;
 using EIV_JsonLib.Lobby;
 using LobbyLib.CustomTicket;
 using EIV_Common.JsonStuff;
-using LobbyLib.Jsons;
+using LobbyLib.Models;
 
 namespace LobbyLib.Web;
 
@@ -95,7 +95,7 @@ internal partial class EIV_Lobby
         serverStruct.Response.MakeGetResponse(JsonSerializer.Serialize(new ConnectResponse()
         {
             Id = user.Id,
-            Ticket = TicketProcess.CreateTicket(user),
+            Ticket = TicketManager.CreateTicket(user),
         }));
         serverStruct.SendResponse();
         return true;

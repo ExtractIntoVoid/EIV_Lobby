@@ -12,9 +12,11 @@ public class SockControl
 
     public static int PlayerNumber { get; internal set; }
 
-    public static void StartServer(int port, string map)
+    public static event Action<SocketUdsSession, IMessage>? OnMessageReceived;
+
+    public static void StartServer(int port)
     {
-        var path = $"LobbySocket_{port}_{map}.sock";
+        var path = $"LobbySocket_{port}.sock";
         SocketUdsServer sockedUdsServer = new(path);
         sockedUdsServer.Connected += SockedUdsServer_Connected;
         sockedUdsServer.Disconnected += SockedUdsServer_Disconnected;
@@ -22,9 +24,9 @@ public class SockControl
         Servers.Add(sockedUdsServer);
     }
 
-    public static void StopServer(int port, string map)
+    public static void StopServer(int port)
     {
-       var server = Servers.FirstOrDefault(x=>x.Path == $"LobbySocket_{port}_{map}.sock");
+       var server = Servers.FirstOrDefault(x => x.Path == $"LobbySocket_{port}.sock");
         if (server == null)
             return;
         server.Connected += SockedUdsServer_Connected;
@@ -49,7 +51,7 @@ public class SockControl
         IMessage? message = MemoryPackSerializer.Deserialize<IMessage>(data);
         if (message == null)
         {
-            Console.WriteLine("Cannot Deser as IMessage, disconnecting!");
+            Console.WriteLine("Cannot Deserialize as IMessage, disconnecting!");
             session.Disconnect();
         }
         switch (message)
@@ -89,6 +91,7 @@ public class SockControl
                 }
                 break;
             default:
+                OnMessageReceived?.Invoke(session, message);
                 break;
         }
     }

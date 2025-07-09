@@ -1,6 +1,6 @@
 ﻿using EIV_JsonLib;
 
-namespace LobbyLib.Jsons;
+namespace LobbyLib.Models;
 
 public class StashInventory
 {

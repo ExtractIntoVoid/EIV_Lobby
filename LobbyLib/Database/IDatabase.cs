@@ -1,4 +1,4 @@
-﻿using LobbyLib.Jsons;
+﻿using LobbyLib.Models;
 
 namespace LobbyLib.Database;
 
