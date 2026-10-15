@@ -9,7 +9,10 @@ using LobbyLib.Modding;
 
 namespace LobbyLib.Web;
 
-internal partial class EIV_Lobby
+/// <summary>
+/// Represent a Lobby Web communication.
+/// </summary>
+internal partial class LobbyWeb
 {
     public static Dictionary<string, WebSocketStruct> ClientUserToWS = [];
 

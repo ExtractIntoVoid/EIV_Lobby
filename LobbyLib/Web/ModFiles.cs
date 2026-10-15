@@ -1,37 +1,46 @@
-﻿using ModdableWebServer.Attributes;
-using ModdableWebServer;
-using NetCoreServer;
-using ModdableWebServer.Helper;
-using LobbyLib.Managers;
+﻿using LobbyLib.Managers;
+using ModdableWebServer.Attributes;
+using ModdableWebServer.Senders;
 
 namespace LobbyLib.Web;
 
-internal partial class EIV_Lobby
+/// <summary>
+/// Represent a Lobby Web communication.
+/// </summary>
+internal partial class LobbyWeb
 {
-
+    /// <summary>
+    /// <see cref="FilesMods(ServerSender)"/>.
+    /// </summary>
+    /// <param name="sender">Sender.</param>
+    /// <returns>ToSkip.</returns>
+#pragma warning disable CA2243 // Attribute string literals should parse correctly
     [HTTP("GET", "/Files/{build}/Mods/{modpath}")]
-    public static bool FilesMods(HttpRequest request, ServerStruct serverStruct)
+#pragma warning restore CA2243 // Attribute string literals should parse correctly
+    public static bool FilesMods(ServerSender sender)
     {
-        string build = serverStruct.Parameters["build"];
-        string modpath = serverStruct.Parameters["modpath"];
+        string build = sender.Parameters["build"];
+        string modpath = sender.Parameters["modpath"];
         if (modpath == "mods.txt")
         {
             // All currently loaded mods.
             var rsp = ModDownloadManager.GetModsTxt(build);
-            serverStruct.Response.MakeGetResponse(rsp);
-            serverStruct.SendResponse();
+            sender.Response.MakeGetResponse(rsp);
+            sender.SendResponse();
             return true;
         }
-        //get the actual files here.
+
+        // get the actual files here.
         var res = ModDownloadManager.GetFile(build, modpath);
         if (res.Length == 0)
         {
-            serverStruct.Response.MakeErrorResponse("File is not found!");
-            serverStruct.SendResponse();
+            sender.Response.MakeErrorResponse("File is not found!");
+            sender.SendResponse();
             return true;
         }
-        serverStruct.Response.MakeGetResponse(res);
-        serverStruct.SendResponse();
+
+        sender.Response.MakeGetResponse(res);
+        sender.SendResponse();
         return true;
     }
 }

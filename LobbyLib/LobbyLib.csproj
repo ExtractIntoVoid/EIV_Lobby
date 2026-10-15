@@ -1,39 +1,53 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFrameworks>net10.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="EIV_Common" Version="0.0.2" />
-    <PackageReference Include="EIV_DataPack" Version="1.0.3.1" />
-    <PackageReference Include="EIV_JsonLib" Version="2.0.5.2" />
-    <PackageReference Include="ini-parser-netstandard" Version="2.5.2" />
+    <Compile Remove="Managers\FriendManager.cs" />
+    <Compile Remove="Managers\GameStartManager.cs" />
+    <Compile Remove="Managers\GroupManager.cs" />
+    <Compile Remove="Managers\ItemActionManager.cs" />
+    <Compile Remove="Managers\QueueManager.cs" />
+    <Compile Remove="SocketControl\SockControl.cs" />
+    <Compile Remove="Web\SocketClientGUID.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Managers\FriendManager.cs" />
+    <None Include="Managers\GameStartManager.cs" />
+    <None Include="Managers\GroupManager.cs" />
+    <None Include="Managers\ItemActionManager.cs" />
+    <None Include="Managers\QueueManager.cs" />
+    <None Include="SocketControl\SockControl.cs" />
+    <None Include="Web\SocketClientGUID.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="EIV_Coroutines" Version="2.3.0" />
+    <PackageReference Include="EIV_DataPack" Version="1.1.0" />
+    <PackageReference Include="EIV_Pack" Version="2.3.2" />
+    <PackageReference Include="ini-parser-netstandard" Version="2.5.3" />
     <PackageReference Include="LiteDB" Version="5.0.21" />
-    <PackageReference Include="ModAPI" Version="0.0.2.1" />
-    <PackageReference Include="ModdableWebServer" Version="1.5.0" />
-    <PackageReference Include="SemanticVersioning" Version="2.0.2" />
+    <PackageReference Include="ModdableWebServer" Version="3.1.0" />
+    <PackageReference Include="SemanticVersioning" Version="3.0.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
+    <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
+    <PackageReference Include="ServerEmus.IniGenerator" Version="0.0.6" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SharedSocket\SharedSocket.csproj" />
+    <ProjectReference Include="..\EIV_LobbyData\EIV_LobbyData.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="LobbyLib_Res.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>LobbyLib_Res.resx</DependentUpon>
-    </Compile>
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Update="LobbyLib_Res.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>LobbyLib_Res.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
+	  <PackageReference Include="EIV_DefinitionCore" Version="3.0.0" />
+	  <PackageReference Include="EIV_Items" Version="3.0.0" />
+	  <PackageReference Include="EIV_Effects" Version="3.0.0" />
+	  <PackageReference Include="EIV_Profile" Version="3.0.0" />
   </ItemGroup>
 
 </Project>

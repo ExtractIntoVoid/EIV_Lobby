@@ -1,103 +1,134 @@
-﻿using ModdableWebServer.Attributes;
-using ModdableWebServer.Helper;
-using ModdableWebServer;
-using NetCoreServer;
-using System.Text.Json;
-using EIV_Common.InfoJson;
-using EIV_Common;
-using EIV_JsonLib.Lobby;
-using LobbyLib.CustomTicket;
-using EIV_Common.JsonStuff;
+﻿using EIV_LobbyData;
+using LobbyLib.INI;
+using LobbyLib.Managers;
 using LobbyLib.Models;
+using ModdableWebServer.Attributes;
+using ModdableWebServer.Senders;
+using System.Text.Json;
 
 namespace LobbyLib.Web;
 
-internal partial class EIV_Lobby
+/// <summary>
+/// Represent a Lobby Web communication.
+/// </summary>
+internal partial class LobbyWeb
 {
-    
+    /// <summary>
+    /// <see cref="Connect(ServerSender)"/>.
+    /// </summary>
+    /// <param name="sender">Sender.</param>
+    /// <returns>ToSkip.</returns>
     [HTTP("POST", "/Connect")]
-    public static bool LobbyConnect(HttpRequest request, ServerStruct serverStruct)
+    public static bool Connect(ServerSender sender)
     {
-        if (string.IsNullOrEmpty(request.Body))
+        if (string.IsNullOrEmpty(sender.Request.Body))
         {
-            serverStruct.Response.MakeErrorResponse();
-            serverStruct.SendResponse();
+            sender.Response.MakeErrorResponse();
+            sender.SendResponse();
             return true;
         }
 
-        var userinfo = JsonSerializer.Deserialize<UserInfoJson>(request.Body);
+        if (!JsonSerializerConvert.TryGetTypeInfo<ConnectResponse>(out var connectResponseTypeInfo))
+        {
+            sender.Response.MakeErrorResponse("Cannot get ConnectResponse typeInfo");
+            sender.SendResponse();
+            return true;
+        }
+
+        if (!JsonSerializerConvert.TryGetTypeInfo<ConnectRequest>(out var typeInfo))
+        {
+            sender.Response.MakeErrorResponse("Cannot get ConnectRequest typeInfo");
+            sender.SendResponse();
+            return true;
+        }
+
+        ConnectRequest? userinfo = JsonSerializer.Deserialize(sender.Request.Body, typeInfo);
         if (userinfo == null)
         {
-            serverStruct.Response.MakeErrorResponse("UserInfoJson cannot parse");
-            serverStruct.SendResponse();
+            sender.Response.MakeErrorResponse("ConnectRequest cannot parse");
+            sender.SendResponse();
             return true;
         }
 
-        var range = SemanticVersioning.Range.Parse(ConfigINI.Read("Lobby.ini", "Lobby", "Version"));
+        var range = SemanticVersioning.Range.Parse(MainIni.Instance.Lobby.VersionRange);
         var version = SemanticVersioning.Version.Parse(userinfo.Version);
 
         if (!range.IsSatisfied(version, true))
         {
-            serverStruct.Response.MakeErrorResponse("VersionCheck");
-            serverStruct.SendResponse();
+            sender.Response.MakeErrorResponse("VersionCheck");
+            sender.SendResponse();
             return true;
         }
 
-        var user = MainControl.Database.GetUserDatas().FirstOrDefault(x => x.UserId == userinfo.CreateUserId());
+        var user = MainControl.Database.GetUserDatas().FirstOrDefault(x => x.CustomId == userinfo.UserId);
         if (user == null)
         {
             user = new()
             {
                 Id = Guid.NewGuid(),
-                UserId = userinfo.CreateUserId(),
-                Name = userinfo.Name,
+                CustomId = userinfo.UserId,
+                Name = userinfo.PlatformUserName,
                 FriendsIds = [],
-                BlockList = new(),
+                BlockList = new([], [], []),
                 FriendRequests = [],
             };
             MainControl.Database.SaveUserData(user);
+
             // create stash
-            StashInventory stash = new()
+            UserStash stash = new()
             {
-                UserId = user.Id,
-                Stash = new()
+                Id = user.Id,
+                Stash = new(),
             };
-            if (Storage.Stashes.TryGetValue(ConfigINI.Read("Config.ini", "Default", "DefaultStashName"), out var out_stash))
+
+            if (GameDataStorage.Stashes.TryGetValue(MainIni.Instance.GameData.DefaultStashName, out var out_stash))
+            {
                 stash.Stash = out_stash;
+            }
+
             MainControl.Database.SaveStashInventory(stash);
 
             UserProfile profile = new()
             {
-                UserId = user.Id,
+                Id = user.Id,
                 Character = new()
                 {
                     Name = user.Name,
                     CreationDate = DateTime.Now,
                     Inventory = new(),
-                    Modules = new(),
+                    Modules = [],
                     Origin = string.Empty,
-                }
+                },
             };
-            string origin = ConfigINI.Read("Config.ini", "Default", "DefaultOrigin");
-            //  Additional Datas must be "Key1=Value1;Key2=Value2".
-            if (userinfo.AdditionalData.Contains("origin"))
+            string origin = MainIni.Instance.GameData.DefaultOrigin;
+
+            // Additional Datas must be "Key1=Value1;Key2=Value2".
+            if (userinfo.AdditionalData.Contains("origin", StringComparison.InvariantCultureIgnoreCase))
             {
                 origin = userinfo.AdditionalData.Split("origin=")[1].Split(";")[0];
             }
 
-            if (Storage.Inventories.TryGetValue(ConfigINI.Read("Config.ini", "Default", "DefaultInventoryName"), out var out_inventory))
-                profile.Character.Inventory = out_inventory;
-            if (Storage.OriginToModules.TryGetValue(origin, out var out_modules))
-                profile.Character.Modules = out_modules;
-            MainControl.Database.SaveProfile(profile);
+            profile.Character.Origin = origin;
 
+            if (GameDataStorage.Inventories.TryGetValue(MainIni.Instance.GameData.DefaultInventoryName, out var out_inventory))
+            {
+                profile.Character.Inventory = out_inventory;
+            }
+
+            if (GameDataStorage.OriginToModules.TryGetValue(origin, out var out_modules))
+            {
+                profile.Character.Modules.Clear();
+                foreach (var item in out_modules)
+                {
+                    profile.Character.Modules.Add(item);
+                }
+            }
+
+            MainControl.Database.SaveProfile(profile);
         }
-        serverStruct.Response.MakeGetResponse(JsonSerializer.Serialize(new ConnectResponse()
-        {
-            Id = user.Id,
-            Ticket = TicketManager.CreateTicket(user),
-        }));
-        serverStruct.SendResponse();
+
+        sender.Response.MakeGetResponse(JsonSerializer.Serialize(new ConnectResponse(user.Id, string.Empty), connectResponseTypeInfo));
+        sender.SendResponse();
         return true;
     }
 }

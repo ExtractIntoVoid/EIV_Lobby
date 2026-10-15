@@ -1,4 +1,5 @@
-﻿using EIV_Common.Coroutines;
+﻿/*
+using EIV_Common.Coroutines;
 using LobbyLib.Managers;
 using MemoryPack;
 using SharedSocket;
@@ -67,9 +68,9 @@ public class SockControl
             case OnPlayerConnection onPlayerConnection:
                 {
                     if (onPlayerConnection.IsConnected)
-                        Console.WriteLine($"New player connected! {onPlayerConnection.UserId}");
+                        Console.WriteLine($"New player connected! {onPlayerConnection.Id}");
                     else
-                        Console.WriteLine($"Player disconnected! {onPlayerConnection.UserId}");
+                        Console.WriteLine($"Player disconnected! {onPlayerConnection.Id}");
                 }
                 break;
             case SyncPlayerList syncPlayerList:
@@ -96,3 +97,4 @@ public class SockControl
         }
     }
 }
+*/

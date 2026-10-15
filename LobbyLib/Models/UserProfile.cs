@@ -1,9 +1,14 @@
-﻿using EIV_JsonLib.Profile;
+﻿using EIV_Profile;
 
 namespace LobbyLib.Models;
 
-public class UserProfile
+/// <summary>
+/// Represent a saved user character profile.
+/// </summary>
+public class UserProfile : CoreUserModel
 {
-    public Guid UserId { get; set; } //ID From UserDB Id
+    /// <summary>
+    /// Gets or sets the character.
+    /// </summary>
     public UserCharacter Character { get; set; } = new();
 }

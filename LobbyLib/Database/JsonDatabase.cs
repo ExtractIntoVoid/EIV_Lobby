@@ -1,114 +1,211 @@
 ﻿using LobbyLib.Models;
-using EIV_JsonLib.Json;
+using System.Collections.ObjectModel;
 using System.Text.Json;
 
 namespace LobbyLib.Database;
 
-internal class JsonDatabase : IDatabase
+/// <summary>
+/// Represent a json database.
+/// </summary>
+public class JsonDatabase : IDatabase
 {
-    public string dir_path = Path.Combine(Directory.GetCurrentDirectory(), "Database", "JsonDatabase");
-    public void Create()
-    {
-        if (!Directory.Exists(dir_path))
-            Directory.CreateDirectory(dir_path);
-    }
+    /// <summary>
+    /// Creates a directory.
+    /// </summary>
+    /// <param name="dir">The directory name.</param>
     public static void CreateDir(string dir)
     {
         var dirname = Path.GetDirectoryName(dir);
         if (!string.IsNullOrEmpty(dirname) && !Directory.Exists(dirname))
+        {
             Directory.CreateDirectory(dirname);
+        }
     }
-    #region Inventory
-    public void SaveProfile(UserProfile inventory)
+
+    private readonly string jsonDatabasePath = Path.Combine(Directory.GetCurrentDirectory(), "Database", "JsonDatabase");
+
+    /// <inheritdoc/>
+    public void Create()
     {
+        if (!Directory.Exists(jsonDatabasePath))
+        {
+            Directory.CreateDirectory(jsonDatabasePath);
+        }
+    }
+
+    /// <inheritdoc/>
+    public void SaveProfile(UserProfile profile)
+    {
+        if (profile == null)
+        {
+            return;
+        }
+
         Create();
-        var json = Path.Combine(dir_path, inventory.UserId.ToString().Replace("-", "_"), "Inventory.json");
+        var json = Path.Combine(jsonDatabasePath, profile.Id.Simplyfy(), "Inventory.json");
         CreateDir(json);
-        File.WriteAllText(json, JsonSerializer.Serialize(inventory, ConvertHelper.GetSerializerSettings()));
+
+        if (!JsonSerializerConvert.TryGetTypeInfo<UserProfile>(out var typeInfo))
+        {
+            return;
+        }
+
+        File.WriteAllText(json, JsonSerializer.Serialize(profile, typeInfo));
     }
 
-    public UserProfile? GetProfile(Guid Id)
+    /// <inheritdoc/>
+    public UserProfile? GetProfile(Guid id)
     {
         Create();
-        var json = Path.Combine(dir_path, Id.ToString().Replace("-", "_"), "Inventory.json");
+        var json = Path.Combine(jsonDatabasePath, id.Simplyfy(), "Inventory.json");
         if (!File.Exists(json))
+        {
             return null;
-        return JsonSerializer.Deserialize<UserProfile>(File.ReadAllText(json), ConvertHelper.GetSerializerSettings());
+        }
+
+        if (!JsonSerializerConvert.TryGetTypeInfo<UserProfile>(out var typeInfo))
+        {
+            return null;
+        }
+
+        return JsonSerializer.Deserialize<UserProfile>(File.ReadAllText(json), typeInfo);
     }
 
-    public void DeleteProfile(Guid Id)
+    /// <inheritdoc/>
+    public void DeleteProfile(Guid id)
     {
-        var json = Path.Combine(dir_path, Id.ToString().Replace("-", "_"), "Inventory.json");
+        var json = Path.Combine(jsonDatabasePath, id.Simplyfy(), "Inventory.json");
         if (File.Exists(json))
+        {
             File.Delete(json);
+        }
     }
-    #endregion
-    #region Stash
-    public void SaveStashInventory(StashInventory inventory)
+
+    /// <inheritdoc/>
+    public void SaveStashInventory(UserStash inventory)
     {
+        if (inventory == null)
+        {
+            return;
+        }
+
         Create();
-        var json = Path.Combine(dir_path, inventory.UserId.ToString().Replace("-", "_"), "StashInventory.json");
+        var json = Path.Combine(jsonDatabasePath, inventory.Id.Simplyfy(), "StashInventory.json");
         CreateDir(json);
-        File.WriteAllText(json, JsonSerializer.Serialize(inventory, ConvertHelper.GetSerializerSettings()));
+
+        if (!JsonSerializerConvert.TryGetTypeInfo<UserStash>(out var typeInfo))
+        {
+            return;
+        }
+
+        File.WriteAllText(json, JsonSerializer.Serialize(inventory, typeInfo));
     }
 
-    public StashInventory? GetStashInventory(Guid Id)
+    /// <inheritdoc/>
+    public UserStash? GetStashInventory(Guid id)
     {
         Create();
-        var json = Path.Combine(dir_path, Id.ToString().Replace("-", "_"), "StashInventory.json");
+        var json = Path.Combine(jsonDatabasePath, id.Simplyfy(), "StashInventory.json");
         if (!File.Exists(json))
+        {
             return null;
-        return JsonSerializer.Deserialize<StashInventory>(File.ReadAllText(json), ConvertHelper.GetSerializerSettings());
+        }
+
+        if (!JsonSerializerConvert.TryGetTypeInfo<UserStash>(out var typeInfo))
+        {
+            return null;
+        }
+
+        return JsonSerializer.Deserialize<UserStash>(File.ReadAllText(json), typeInfo);
     }
 
-    public void DeleteStashInventory(Guid Id)
+    /// <inheritdoc/>
+    public void DeleteStashInventory(Guid id)
     {
-        var json = Path.Combine(dir_path, Id.ToString().Replace("-", "_"), "StashInventory.json");
+        var json = Path.Combine(jsonDatabasePath, id.Simplyfy(), "StashInventory.json");
         if (File.Exists(json))
+        {
             File.Delete(json);
+        }
     }
-    #endregion
-    #region UserData
+
+    /// <inheritdoc/>
     public void SaveUserData(UserData userData)
     {
+        if (userData == null)
+        {
+            return;
+        }
+
         Create();
-        var json = Path.Combine(dir_path, userData.Id.ToString().Replace("-", "_"), "UserData.json");
+        var json = Path.Combine(jsonDatabasePath, userData.Id.Simplyfy(), "UserData.json");
         CreateDir(json);
-        File.WriteAllText(json, JsonSerializer.Serialize(userData));
+
+        if (!JsonSerializerConvert.TryGetTypeInfo<UserData>(out var typeInfo))
+        {
+            return;
+        }
+
+        File.WriteAllText(json, JsonSerializer.Serialize(userData, typeInfo));
     }
 
-    public List<UserData> GetUserDatas()
+    /// <inheritdoc/>
+    public Collection<UserData> GetUserDatas()
     {
         Create();
-        List<UserData> userDatas = [];
-        foreach (string userId in Directory.GetDirectories(dir_path))
+        Collection<UserData> userDatas = [];
+
+        if (!JsonSerializerConvert.TryGetTypeInfo<UserData>(out var typeInfo))
+        {
+            return userDatas;
+        }
+
+        foreach (string userId in Directory.GetDirectories(jsonDatabasePath))
         {
             // for log
             Console.WriteLine(userId);
             var userDataPath = Path.Combine(userId, "UserData.json");
             if (File.Exists(userDataPath))
             {
-                userDatas.Add(JsonSerializer.Deserialize<UserData>(File.ReadAllText(userDataPath))!);
+                UserData? data = JsonSerializer.Deserialize<UserData>(File.ReadAllText(userDataPath), typeInfo);
+
+                if (data == null)
+                {
+                    continue;
+                }
+
+                userDatas.Add(data);
             }
         }
 
         return userDatas;
     }
 
-    public UserData? GetUserData(Guid Id)
+    /// <inheritdoc/>
+    public UserData? GetUserData(Guid id)
     {
         Create();
-        var json = Path.Combine(dir_path, Id.ToString().Replace("-", "_"), "UserData.json");
+        var json = Path.Combine(jsonDatabasePath, id.Simplyfy(), "UserData.json");
         if (!File.Exists(json))
+        {
             return null;
-        return JsonSerializer.Deserialize<UserData>(File.ReadAllText(json));
+        }
+
+        if (!JsonSerializerConvert.TryGetTypeInfo<UserData>(out var typeInfo))
+        {
+            return null;
+        }
+
+        return JsonSerializer.Deserialize<UserData>(File.ReadAllText(json), typeInfo);
     }
 
-    public void DeleteUserData(Guid Id)
+    /// <inheritdoc/>
+    public void DeleteUserData(Guid id)
     {
-        var json = Path.Combine(dir_path, Id.ToString().Replace("@", "_"), "UserData.json");
+        var json = Path.Combine(jsonDatabasePath, id.Simplyfy(), "UserData.json");
         if (File.Exists(json))
+        {
             File.Delete(json);
+        }
     }
-    #endregion
 }

@@ -1,61 +1,57 @@
 ﻿using LobbyLib.Models;
+using System.Collections.ObjectModel;
 
 namespace LobbyLib.Database;
 
-internal class LiteDB_Database : IDatabase
+/// <summary>
+/// Represent an liteDB database.
+/// </summary>
+public class LiteDB_Database : IDatabase
 {
-
+    /// <inheritdoc/>
     public void Create()
     {
-        
     }
 
-    public void DeleteProfile(Guid Id)
+    /// <inheritdoc/>
+    public void DeleteProfile(Guid id)
     {
-        
     }
 
-    public void DeleteStashInventory(Guid Id)
+    /// <inheritdoc/>
+    public void DeleteStashInventory(Guid id)
     {
-        
     }
 
-    public void DeleteUserData(Guid Id)
+    /// <inheritdoc/>
+    public void DeleteUserData(Guid id)
     {
-        
-    }
-    public UserProfile? GetProfile(Guid Id)
-    {
-        return null;
     }
 
-    public StashInventory? GetStashInventory(Guid Id)
+    /// <inheritdoc/>
+    public UserProfile? GetProfile(Guid id) => null;
+
+    /// <inheritdoc/>
+    public UserStash? GetStashInventory(Guid id) => null;
+
+    /// <inheritdoc/>
+    public UserData? GetUserData(Guid id) => null;
+
+    /// <inheritdoc/>
+    public Collection<UserData> GetUserDatas() => [];
+
+    /// <inheritdoc/>
+    public void SaveProfile(UserProfile profile)
     {
-        return null;
     }
 
-    public UserData? GetUserData(Guid Id)
+    /// <inheritdoc/>
+    public void SaveStashInventory(UserStash inventory)
     {
-        return null;
-    }
-    public List<UserData> GetUserDatas()
-    {
-        return [];
     }
 
-
-    public void SaveProfile(UserProfile inventory)
-    {
-        
-    }
-
-    public void SaveStashInventory(StashInventory inventory)
-    {
-        
-    }
-
+    /// <inheritdoc/>
     public void SaveUserData(UserData userData)
     {
-        
     }
 }

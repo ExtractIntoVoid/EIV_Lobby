@@ -40,7 +40,7 @@ public class ItemActionManager
             return;
         if (stash.Stash.Items.Remove(discard.ItemToDiscard))
         {
-            EIV_Lobby.SendResponse(socketStruct, new ClientSocketResponse()
+            LobbyWeb.SendResponse(socketStruct, new ClientSocketResponse()
             {
                 IsSuccess = true,
                 ErrorCode = 0,

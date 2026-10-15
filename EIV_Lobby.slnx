@@ -1,0 +1,23 @@
+<Solution>
+  <Configurations>
+    <BuildType Name="Debug" />
+    <BuildType Name="ExportDebug" />
+    <BuildType Name="ExportRelease" />
+    <BuildType Name="Release" />
+  </Configurations>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+  </Folder>
+  <Project Path="EIV_LobbyData/EIV_LobbyData.csproj">
+    <BuildType Solution="ExportDebug|*" Project="Release" />
+    <BuildType Solution="ExportRelease|*" Project="Release" />
+  </Project>
+  <Project Path="LobbyConsole/LobbyConsole.csproj">
+    <BuildType Solution="ExportDebug|*" Project="Debug" />
+    <BuildType Solution="ExportRelease|*" Project="Release" />
+  </Project>
+  <Project Path="LobbyLib/LobbyLib.csproj">
+    <BuildType Solution="ExportDebug|*" Project="Debug" />
+    <BuildType Solution="ExportRelease|*" Project="Release" />
+  </Project>
+</Solution>

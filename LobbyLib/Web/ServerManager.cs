@@ -1,160 +1,101 @@
-﻿using EIV_Common;
-using ModdableWebServer.Attributes;
+﻿using LobbyLib.INI;
 using ModdableWebServer.Helper;
+using ModdableWebServer.Interfaces;
 using ModdableWebServer.Servers;
 using NetCoreServer;
-using System.Reflection;
+using Serilog;
+using System.Runtime.Intrinsics.X86;
 
 namespace LobbyLib.Web;
 
-public class ServerManager
+/// <summary>
+/// Provides a management for web server.
+/// </summary>
+public static class ServerManager
 {
-    public static string IpPort = "http://127.0.0.1:7777/";
-    public static string IpPort_WS = "ws://127.0.0.1:7777/";
-    public static string IP = "127.0.0.1:7777";
-    static WSS_Server? WSS_Server = null;
-    static WS_Server? WS_Server = null;
+    /// <summary>
+    /// Gets the ip and port for the web server.
+    /// </summary>
+    public static string IpPort_Http { get; private set; } = "http://127.0.0.1:7777/";
 
-    static bool IsSsl = true;
-    static Dictionary<string, Dictionary<HTTPAttribute, MethodInfo>> HTTP_Plugins = [];
-    static Dictionary<string, Dictionary<string, MethodInfo>> WS_Plugins = [];
-    static Dictionary<HTTPAttribute, MethodInfo> Main_HTTP = [];
-    static Dictionary<string, MethodInfo> Main_WS = [];
-    public static void Start(string ip, int port, bool ssl = true, bool OnlyWS = false, bool IsCertValidate = false)
+    /// <summary>
+    /// Gets the ip and port for the web socket server.
+    /// </summary>
+    public static string IpPort_WS { get; private set; } = "ws://127.0.0.1:7777/";
+
+    /// <summary>
+    /// Gets the ip and port the server is running on.
+    /// </summary>
+    public static string IpPort { get; private set; } = "127.0.0.1:7777";
+
+    /// <summary>
+    /// Gets the web socket server.
+    /// </summary>
+    public static IWSServer? Server { get; private set; }
+
+    /// <summary>
+    /// Starts the server.
+    /// </summary>
+    public static void Start()
     {
-        var ServerManagerAssembly = Assembly.GetAssembly(typeof(ServerManager));
-        ArgumentNullException.ThrowIfNull(ServerManagerAssembly, nameof(ServerManagerAssembly));
-        //JWTHandler.CreateRSA();
-        IsSsl = ssl;
-        if (ssl)
+        bool sslEnabled = MainIni.Instance.SSL.Enabled;
+
+        string ip = MainIni.Instance.Lobby.Address;
+        int port = MainIni.Instance.Lobby.Port;
+
+        if (sslEnabled && string.IsNullOrEmpty(MainIni.Instance.SSL.PfxPath) && string.IsNullOrEmpty(MainIni.Instance.SSL.PfxPasword))
         {
-            SslContext? context = null;
+            Log.Information("PfxPath and PfxPassword not declared, SSL is disabled.");
+            sslEnabled = false;
+        }
 
-            if (IsCertValidate)
-                context = CertHelper.GetContextNoValidate(System.Security.Authentication.SslProtocols.Tls12, ConfigINI.Read("config.ini", "Lobby", "PfxPath"), ConfigINI.Read("config.ini", "Lobby", "PfxPasword"));
+        if (sslEnabled)
+        {
+            SslContext? context;
+            if (MainIni.Instance.SSL.VerifyCertificate)
+            {
+                context = CertHelper.GetContextNoValidate(MainIni.Instance.SSL.Protocol, MainIni.Instance.SSL.PfxPath, MainIni.Instance.SSL.PfxPasword);
+            }
             else
-                context = CertHelper.GetContext(System.Security.Authentication.SslProtocols.Tls12, ConfigINI.Read("config.ini", "Lobby", "PfxPath"), ConfigINI.Read("config.ini", "Lobby", "PfxPasword"));
-            WSS_Server = new(context, ip, port);
+            {
+                context = CertHelper.GetContext(MainIni.Instance.SSL.Protocol, MainIni.Instance.SSL.PfxPath, MainIni.Instance.SSL.PfxPasword);
+            }
 
-            Main_HTTP = AttributeMethodHelper.UrlHTTPLoader(ServerManagerAssembly);
-            Main_WS = AttributeMethodHelper.UrlWSLoader(ServerManagerAssembly);
-            WSS_Server.DoReturn404IfFail = false;
-            WSS_Server.ReceivedFailed += Failed;
-            WSS_Server.OverrideAttributes(ServerManagerAssembly);
-            if (!OnlyWS)
-                WSS_Server.OverrideAttributes(ServerManagerAssembly);
-            WSS_Server.Start();
+            Server = new WSS_Server(context, ip, port)
+            {
+                DoReturn404IfFail = false,
+            };
+
+            ((WSS_Server)Server)!.OverrideAttributes(typeof(LobbyWeb));
+
+            Server.Start();
         }
         else
         {
-            WS_Server = new(ip, port);
-            WS_Server.OverrideAttributes(ServerManagerAssembly);
-            if (!OnlyWS)
-                WS_Server.OverrideAttributes(ServerManagerAssembly);
-            WS_Server.DoReturn404IfFail = false;
-            WS_Server.ReceivedFailed += Failed;
-            WS_Server.Start();
+            Server = new WS_Server(ip, port)
+            {
+                DoReturn404IfFail = false,
+            };
+
+            ((WS_Server)Server)!.OverrideAttributes(typeof(LobbyWeb));
+
+            Server.Start();
         }
-        IpPort = ssl ? $"https://{ip}:{port}/" : $"http://{ip}:{port}/";
-        IpPort_WS = ssl ? $"wss://{ip}:{port}/" : $"ws://{ip}:{port}/";
-        IP = $"{ip}:{port}";
-        Console.WriteLine("Server started on " + IpPort + " | " + IpPort_WS);
 
+        IpPort_Http = sslEnabled ? $"https://{ip}:{port}/" : $"http://{ip}:{port}/";
+        IpPort_WS = sslEnabled ? $"wss://{ip}:{port}/" : $"ws://{ip}:{port}/";
+        IpPort = $"{ip}:{port}";
+        Log.Information("Server started on " + IpPort_Http + " | " + IpPort_WS);
     }
 
-    public static void Failed(object? sender, HttpRequest request)
-    {
-        File.WriteAllText("REQUESTED.txt", request.Method + " " + request.Url + "\n" + request.Body + "\n" + request.ToString());
-    }
-
-
+    /// <summary>
+    /// Stops the server.
+    /// </summary>
     public static void Stop()
     {
-        if (WS_Server != null)
-        {
-            WS_Server.Stop();
-            WS_Server = null;
-        }
-        if (WSS_Server != null)
-        {
-            WSS_Server.Stop();
-            WSS_Server = null;
-        }
+        Server?.Stop();
+        Server = null;
 
-        Console.WriteLine("Server stopped.");
-    }
-
-    public static void AddRoutes(Assembly assembly)
-    {
-        if (IsSsl && WSS_Server != null)
-        {
-            var name = assembly.GetName().FullName;
-            HTTP_Plugins.Add(name, AttributeMethodHelper.UrlHTTPLoader(assembly));
-            WS_Plugins.Add(name, AttributeMethodHelper.UrlWSLoader(assembly));
-            WSS_Server.MergeWSAttribute(assembly);
-            WSS_Server.MergeAttribute(assembly);
-        }
-        if (!IsSsl && WS_Server != null)
-        {
-            WS_Server.MergeWSAttribute(assembly);
-            WS_Server.MergeAttribute(assembly);
-        }
-    }
-
-    public static void RemoveRoutes(Assembly assembly)
-    {
-        var name = assembly.GetName().FullName;
-        HTTP_Plugins.Remove(name);
-        WS_Plugins.Remove(name);
-        if (IsSsl && WSS_Server != null)
-        {
-            WSS_Server.HTTP_AttributeToMethods = Main_HTTP;
-            WSS_Server.WS_AttributeToMethods = Main_WS;
-            foreach (var plugin in HTTP_Plugins)
-            {
-                if (plugin.Key == name)
-                    return;
-
-                foreach (var item in plugin.Value)
-                {
-                    WSS_Server.HTTP_AttributeToMethods.TryAdd(item.Key, item.Value);
-                }
-            }
-            foreach (var plugin in WS_Plugins)
-            {
-                if (plugin.Key == name)
-                    return;
-
-                foreach (var item in plugin.Value)
-                {
-                    WSS_Server.WS_AttributeToMethods.TryAdd(item.Key, item.Value);
-                }
-            }
-        }
-        if (!IsSsl && WS_Server != null)
-        {
-            WS_Server.HTTP_AttributeToMethods = Main_HTTP;
-            WS_Server.WS_AttributeToMethods = Main_WS;
-            foreach (var plugin in HTTP_Plugins)
-            {
-                if (plugin.Key == name)
-                    return;
-
-                foreach (var item in plugin.Value)
-                {
-                    WS_Server.HTTP_AttributeToMethods.TryAdd(item.Key, item.Value);
-                }
-            }
-            foreach (var plugin in WS_Plugins)
-            {
-                if (plugin.Key == name)
-                    return;
-
-                foreach (var item in plugin.Value)
-                {
-                    WS_Server.WS_AttributeToMethods.TryAdd(item.Key, item.Value);
-                }
-            }
-        }
+        Log.Information("Server stopped.");
     }
 }

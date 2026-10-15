@@ -1,13 +1,35 @@
-﻿using EIV_JsonLib.Lobby;
+﻿using EIV_LobbyData;
+using System.Collections.ObjectModel;
 
 namespace LobbyLib.Models;
 
-public class UserData
+/// <summary>
+/// Represent a saved user data.
+/// </summary>
+public class UserData : CoreUserModel
 {
-    public Guid Id { get; set; }
-    public string UserId { get; set; } = string.Empty;
+    /// <summary>
+    /// Gets or sets the user custom id.
+    /// </summary>
+    public string CustomId { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the user name.
+    /// </summary>
     public string Name { get; set; } = string.Empty;
-    public List<string> FriendsIds { get; set; } = [];
-    public List<string> FriendRequests { get; set; } = [];
-    public UserBlockList BlockList { get; set; } = new();
+
+    /// <summary>
+    /// Gets the friend ids.
+    /// </summary>
+    public Collection<Guid> FriendsIds { get; init; } = [];
+
+    /// <summary>
+    /// Gets the friend request ids.
+    /// </summary>
+    public Collection<Guid> FriendRequests { get; init; } = [];
+
+    /// <summary>
+    /// Gets or sets the block list.
+    /// </summary>
+    public UserBlockList BlockList { get; set; } = new([], [], []);
 }

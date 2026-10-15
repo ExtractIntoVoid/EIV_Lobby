@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<Title>Lobby related datas</Title>
+		<Authors>ExtractIntoVoid</Authors>
+		<Company>ExtractIntoVoid</Company>
+		<Description>Lobby related datas for EIV Project</Description>
+		<Copyright>(c) 2026 ExtractIntoVoid</Copyright>
+		<PackageProjectUrl>https://github.com/ExtractIntoVoid/EIV_Lobby</PackageProjectUrl>
+		<Version>1.0</Version>
+		<FileVersion>1.0</FileVersion>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="EIV_DefinitionCore" Version="3.0.0" />
+		<PackageReference Include="System.Text.Json" Version="8.0.6" />
+	</ItemGroup>
+</Project>

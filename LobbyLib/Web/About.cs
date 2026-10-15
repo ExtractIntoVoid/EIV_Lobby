@@ -1,38 +1,43 @@
-﻿using ModdableWebServer.Attributes;
-using ModdableWebServer;
-using NetCoreServer;
-using ModdableWebServer.Helper;
-using EIV_Common;
-using EIV_JsonLib;
+﻿using EIV_LobbyData;
+using LobbyLib.INI;
+using ModdableWebServer.Attributes;
+using ModdableWebServer.Senders;
 using System.Text.Json;
 
 namespace LobbyLib.Web;
 
-internal partial class EIV_Lobby
+/// <summary>
+/// Represent a Lobby Web communication.
+/// </summary>
+internal static partial class LobbyWeb
 {
+    /// <summary>
+    /// <see cref="About(ServerSender)"/>.
+    /// </summary>
+    /// <param name="sender">Sender.</param>
+    /// <returns>ToSkip.</returns>
     [HTTP("GET", "/About")]
-    public static bool LobbyAbout(HttpRequest _, ServerStruct serverStruct)
+    public static bool About(ServerSender sender)
     {
-        ServerInfoJson serverInfoJSON = new()
-        {
-            Game = new()
-            {
-                Version = ConfigINI.Read("Lobby.ini", "Lobby", "Version"),
-                AvailableMaps = []
-            },
-            LobbyInfo = new()
-            { 
-                Name = ConfigINI.Read("Lobby.ini", "Lobby", "Name"),
-                Description = ConfigINI.Read("Lobby.ini", "Lobby", "Description"),
-                LongDescription = ConfigINI.Read("Lobby.ini", "Lobby", "LongDescription"),
-                MaxPlayerNumbers = ConfigINI.Read<int>("Lobby.ini", "Lobby", "MaxPlayers"),
-                PlayerNumbers = ChatUserToWS.Count
-            },
-            Mods = []
-        };
+        AboutResponse response = new(
+            [],
+            new GameInfo(MainIni.Instance.Lobby.VersionRange, []),
+            new LobbyInfo(
+                MainIni.Instance.Lobby.Name,
+                MainIni.Instance.Lobby.Description,
+                MainIni.Instance.Lobby.ReadLongDescription(),
+                ChatUserToWS.Count,
+                MainIni.Instance.Lobby.MaxPlayers));
 
-        serverStruct.Response.MakeGetResponse(JsonSerializer.Serialize(serverInfoJSON));
-        serverStruct.SendResponse();
+        if (!JsonSerializerConvert.TryGetTypeInfo<AboutResponse>(out var typeInfo))
+        {
+            sender.Response.MakeErrorResponse();
+            sender.SendResponse();
+            return true;
+        }
+
+        sender.Response.MakeGetResponse(JsonSerializer.Serialize(response, typeInfo));
+        sender.SendResponse();
         return true;
     }
 }

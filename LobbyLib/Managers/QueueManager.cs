@@ -49,7 +49,7 @@ public class QueueManager
             ErrorCode = 0,
             Message = "You have been added to Queue!",
         };
-        EIV_Lobby.SendResponse(socketStruct, response);
+        LobbyWeb.SendResponse(socketStruct, response);
         CheckQueue();
     }
 
@@ -86,11 +86,11 @@ public class QueueManager
                     continue;
                 foreach (var userId in mapqueue.UserIds)
                 {
-                    if (!EIV_Lobby.ClientUserToWS.TryGetValue(userId, out var webSocketStruct))
+                    if (!LobbyWeb.ClientUserToWS.TryGetValue(userId, out var webSocketStruct))
                     {
                         return;
                     }
-                    EIV_Lobby.SendResponse(webSocketStruct, new GameStart()
+                    LobbyWeb.SendResponse(webSocketStruct, new GameStart()
                     { 
                         Address = ip,
                         Port = port

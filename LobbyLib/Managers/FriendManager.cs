@@ -48,7 +48,7 @@ public class FriendManager
         {
             var users = MainControl.Database.GetUserDatas().Where(x => x.Id.ToString() == friendSearch.SearchParam.RemoveSuffix("i: ")).ToList();
 
-            EIV_Lobby.SendResponse(socketStruct, new FriendSearchResponse()
+            LobbyWeb.SendResponse(socketStruct, new FriendSearchResponse()
             {
                 UserIds = users.Select(x => x.UserId).ToList(),
             }, ClientSocketEnum.FriendSearchResponse);
@@ -58,7 +58,7 @@ public class FriendManager
         {
             var users = MainControl.Database.GetUserDatas().Where(x => x.UserId.Contains(friendSearch.SearchParam.RemoveSuffix("u: "))).ToList();
 
-            EIV_Lobby.SendResponse(socketStruct, new FriendSearchResponse()
+            LobbyWeb.SendResponse(socketStruct, new FriendSearchResponse()
             {
                 UserIds = users.Select(x => x.UserId).ToList(),
             }, ClientSocketEnum.FriendSearchResponse);
@@ -68,7 +68,7 @@ public class FriendManager
         {
             var users = MainControl.Database.GetUserDatas().Where(x => x.Name.Contains(friendSearch.SearchParam)).ToList();
 
-            EIV_Lobby.SendResponse(socketStruct, new FriendSearchResponse()
+            LobbyWeb.SendResponse(socketStruct, new FriendSearchResponse()
             { 
                 UserIds = users.Select(x => x.UserId).ToList(),
             }, ClientSocketEnum.FriendSearchResponse);
@@ -101,7 +101,7 @@ public class FriendManager
             return;
         if (friend_user.BlockList.FriendInviteBlocks.Contains(ticket.UserId))
         {
-            EIV_Lobby.SendResponse(socketStruct, new ClientSocketResponse()
+            LobbyWeb.SendResponse(socketStruct, new ClientSocketResponse()
             {
                 IsSuccess = false,
                 ErrorCode = 4,
@@ -126,10 +126,10 @@ public class FriendManager
         }
         MainControl.Database.SaveUserData(user);
         MainControl.Database.SaveUserData(friend_user);
-        EIV_Lobby.SendResponse(socketStruct, socketResponse);
-        if (EIV_Lobby.ClientUserToWS.TryGetValue(friendAction.UserId, out var webSocketStruct))
+        LobbyWeb.SendResponse(socketStruct, socketResponse);
+        if (LobbyWeb.ClientUserToWS.TryGetValue(friendAction.UserId, out var webSocketStruct))
         {
-            EIV_Lobby.SendResponse(webSocketStruct, socketResponse);
+            LobbyWeb.SendResponse(webSocketStruct, socketResponse);
         }
     }
 
@@ -156,7 +156,7 @@ public class FriendManager
             return;
         if (friend_user.BlockList.FriendInviteBlocks.Contains(ticket.UserId))
         {
-            EIV_Lobby.SendResponse(socketStruct, new ClientSocketResponse()
+            LobbyWeb.SendResponse(socketStruct, new ClientSocketResponse()
             {
                 IsSuccess = false,
                 ErrorCode = 4,
@@ -185,10 +185,10 @@ public class FriendManager
         }
         MainControl.Database.SaveUserData(user);
         MainControl.Database.SaveUserData(friend_user);
-        EIV_Lobby.SendResponse(socketStruct, socketResponse);
-        if (EIV_Lobby.ClientUserToWS.TryGetValue(friendAction.UserId, out var webSocketStruct))
+        LobbyWeb.SendResponse(socketStruct, socketResponse);
+        if (LobbyWeb.ClientUserToWS.TryGetValue(friendAction.UserId, out var webSocketStruct))
         {
-            EIV_Lobby.SendResponse(webSocketStruct, socketResponse);
+            LobbyWeb.SendResponse(webSocketStruct, socketResponse);
         }
     }
 
@@ -204,7 +204,7 @@ public class FriendManager
             return;
         user.BlockList = userBlockList;
         MainControl.Database.SaveUserData(user);
-        EIV_Lobby.SendResponse(socketStruct, userBlockList, ClientSocketEnum.BlockListUpdate);
+        LobbyWeb.SendResponse(socketStruct, userBlockList, ClientSocketEnum.BlockListUpdate);
     }
 
 }

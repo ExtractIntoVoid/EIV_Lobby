@@ -1,18 +1,57 @@
 ﻿using LobbyLib.Models;
+using System.Collections.ObjectModel;
 
 namespace LobbyLib.Database;
 
-internal class EmptyDatabase : IDatabase
+/// <summary>
+/// Represent an empty database.
+/// </summary>
+public class EmptyDatabase : IDatabase
 {
-    public void Create() { }
-    public void DeleteProfile(Guid _) { }
-    public void DeleteStashInventory(Guid _) { }
-    public void DeleteUserData(Guid _) { }
-    public UserProfile? GetProfile(Guid _) => null;
-    public StashInventory? GetStashInventory(Guid _) => null;
-    public UserData? GetUserData(Guid _) => null;
-    public List<UserData> GetUserDatas() => [];
-    public void SaveProfile(UserProfile _) { }
-    public void SaveStashInventory(StashInventory _) { }
-    public void SaveUserData(UserData _) { }
+    /// <inheritdoc/>
+    public void Create()
+    {
+    }
+
+    /// <inheritdoc/>
+    public void DeleteProfile(Guid id)
+    {
+    }
+
+    /// <inheritdoc/>
+    public void DeleteStashInventory(Guid id)
+    {
+    }
+
+    /// <inheritdoc/>
+    public void DeleteUserData(Guid id)
+    {
+    }
+
+    /// <inheritdoc/>
+    public UserProfile? GetProfile(Guid id) => null;
+
+    /// <inheritdoc/>
+    public UserStash? GetStashInventory(Guid id) => null;
+
+    /// <inheritdoc/>
+    public UserData? GetUserData(Guid id) => null;
+
+    /// <inheritdoc/>
+    public Collection<UserData> GetUserDatas() => [];
+
+    /// <inheritdoc/>
+    public void SaveProfile(UserProfile profile)
+    {
+    }
+
+    /// <inheritdoc/>
+    public void SaveStashInventory(UserStash inventory)
+    {
+    }
+
+    /// <inheritdoc/>
+    public void SaveUserData(UserData userData)
+    {
+    }
 }

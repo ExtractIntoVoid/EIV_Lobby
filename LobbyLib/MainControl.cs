@@ -1,87 +1,87 @@
-﻿using EIV_Common;
-using EIV_Common.Coroutines;
+﻿using EIV_Coroutines;
 using LobbyLib.Database;
+using LobbyLib.INI;
 using LobbyLib.Managers;
-using LobbyLib.Modding;
 using LobbyLib.Web;
+using Serilog;
 
 namespace LobbyLib;
 
-public class MainControl
+/// <summary>
+/// Provides main lobby control.
+/// </summary>
+public static class MainControl
 {
-    static CoroutineHandle? QueueRunner;
-    static CoroutineHandle? ProcessRunner;
-    public static bool IsAlreadyQuited { get; internal set; } = false;
-    public static string IP { get; internal set; } = "https://127.0.0.1:7777";
-    public static string Ip_Port { get; internal set; } = "127.0.0.1:7777";
+    private static CoroutineHandle? queueRunner;
+    private static CoroutineHandle? processRunner;
+    private static bool isAlreadyQuited;
+
+    /// <summary>
+    /// Gets the database.
+    /// </summary>
     public static IDatabase Database { get; internal set; } = new EmptyDatabase();
 
     /// <summary>
-    /// Init the Server
+    /// Init all managers and starts the server.
     /// </summary>
+    /// <returns><see langword="true"/> if success; otherwise <see langword="false"/>.</returns>
     public static bool InitAll()
     {
+        LogManager.Create();
+
+        GameDataStorage.Init();
+
         // Init custom coroutine. not doing much but we need later on.
-        CoroutineWorkerCustom.HasAnyCoroutines();
-        // ini check
-        if (!File.Exists("Config.ini"))
-        {
-            File.WriteAllText("Config.ini", LobbyLib_Res.Config);
-        }
+        CoroutineFloatManager.HasAnyCoroutines();
 
-        bool ssl = ConfigINI.Read<bool>("Config.ini", "Lobby", "EnableSSL");
-        string Ip = ConfigINI.Read("Config.ini", "Lobby", "ServerAddress");
-        ushort port = ConfigINI.Read<ushort>("Config.ini", "Lobby", "ServerPort");
+        ServerManager.Start();
 
-        if (ssl && string.IsNullOrEmpty(ConfigINI.Read("config.ini", "Lobby", "PfxPath")) && string.IsNullOrEmpty(ConfigINI.Read("config.ini", "Lobby", "PfxPasword")))
-        {
-            Console.WriteLine("PfxPath and PfxPassword not declared, SSL is disabled.");
-            ssl = false;
-        }
-        IP = $"http{(ssl ? "s" : string.Empty)}://{Ip}:{port}";
-        Ip_Port = $"{Ip}:{port}";
-        ServerManager.Start(Ip, port, ssl);
-
-        // DatabaseType
-        var databaseType = ConfigINI.Read("Config.ini","Database", "DatabaseType");
-        if (!int.TryParse(databaseType, out int db_Type))
-            return false;
-        switch (db_Type)
+        switch (MainIni.Instance.GameData.Database)
         {
             case 0:
                 Database = new JsonDatabase();
                 break;
-            /* //Temp disable.
             case 1:
                 Database = new LiteDB_Database();
                 break;
-            */
             default:
                 return false;
         }
+
         Database.Create();
-        ModLoader.LoadMods();
-        GameStartManager.ControlInit();
-        QueueRunner = CoroutineWorkerCustom.CallPeriodically(TimeSpan.FromSeconds(100), QueueManager.CheckQueue);
-        ProcessRunner = CoroutineWorkerCustom.CallPeriodically(TimeSpan.FromSeconds(100), GameStartManager.CheckProcesss);
+
+        // GameStartManager.ControlInit();
+        // QueueRunner = CoroutineFloatManager.CallPeriodically(TimeSpan.FromSeconds(100), QueueManager.CheckQueue);
+        // ProcessRunner = CoroutineFloatManager.CallPeriodically(TimeSpan.FromSeconds(100), GameStartManager.CheckProcesss);
         return true;
     }
 
     /// <summary>
-    /// Stopping the Server
+    /// Stops the server.
     /// </summary>
     public static void Stop()
     {
-        if (IsAlreadyQuited)
-            return; 
-        if (QueueRunner != null)
-            CoroutineWorkerCustom.KillCoroutineInstance(QueueRunner.Value);
-        QueueRunner = null;
-        if (ProcessRunner != null)
-            CoroutineWorkerCustom.KillCoroutineInstance(ProcessRunner.Value);
-        ProcessRunner = null;
-        ModLoader.UnloadMods();
+        if (isAlreadyQuited)
+        {
+            return;
+        }
+
+        if (queueRunner != null)
+        {
+            CoroutineFloatManager.KillCoroutine(queueRunner.Value);
+        }
+
+        queueRunner = null;
+        if (processRunner != null)
+        {
+            CoroutineFloatManager.KillCoroutine(processRunner.Value);
+        }
+
+        processRunner = null;
+
         ServerManager.Stop();
-        IsAlreadyQuited = true;
+        isAlreadyQuited = true;
+
+        LogManager.Close();
     }
 }
