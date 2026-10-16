@@ -8,22 +8,16 @@
 
   <ItemGroup>
     <Compile Remove="Managers\FriendManager.cs" />
-    <Compile Remove="Managers\GameStartManager.cs" />
     <Compile Remove="Managers\GroupManager.cs" />
     <Compile Remove="Managers\ItemActionManager.cs" />
     <Compile Remove="Managers\QueueManager.cs" />
-    <Compile Remove="SocketControl\SockControl.cs" />
-    <Compile Remove="Web\SocketClientGUID.cs" />
   </ItemGroup>
 
   <ItemGroup>
     <None Include="Managers\FriendManager.cs" />
-    <None Include="Managers\GameStartManager.cs" />
     <None Include="Managers\GroupManager.cs" />
     <None Include="Managers\ItemActionManager.cs" />
     <None Include="Managers\QueueManager.cs" />
-    <None Include="SocketControl\SockControl.cs" />
-    <None Include="Web\SocketClientGUID.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -36,7 +30,7 @@
     <PackageReference Include="SemanticVersioning" Version="3.0.0" />
     <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
     <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
-    <PackageReference Include="ServerEmus.IniGenerator" Version="0.0.6" />
+    <PackageReference Include="ServerEmus.IniGenerator" Version="0.0.7" />
   </ItemGroup>
 
   <ItemGroup>

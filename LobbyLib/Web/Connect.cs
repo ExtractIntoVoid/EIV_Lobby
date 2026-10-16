@@ -69,7 +69,7 @@ internal partial class LobbyWeb
                 CustomId = userinfo.UserId,
                 Name = userinfo.PlatformUserName,
                 FriendsIds = [],
-                BlockList = new([], [], []),
+                BlockList = new([], [], [], false, false),
                 FriendRequests = [],
             };
             MainControl.Database.SaveUserData(user);

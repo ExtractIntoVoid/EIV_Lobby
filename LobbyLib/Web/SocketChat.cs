@@ -19,7 +19,7 @@ internal partial class LobbyWeb
     /// <summary>
     /// Gets a ticket to session dictionary.
     /// </summary>
-    public static Dictionary<TicketModel, IWSSession> ChatUserToWS { get; } = [];
+    public static Dictionary<TicketModel, IWSSession> ChatUsers { get; } = [];
 
     /// <summary>
     /// <see cref="SocketChat(WebSocketSender)"/>.
@@ -48,10 +48,10 @@ internal partial class LobbyWeb
         switch (sender.CurrentMethod)
         {
             case WebSocketMethodListen.Connected:
-                ChatUserToWS.Add(ticketstruct, session);
+                ChatUsers.Add(ticketstruct, session);
                 break;
             case WebSocketMethodListen.Disconnected:
-                ChatUserToWS.Remove(ticketstruct);
+                ChatUsers.Remove(ticketstruct);
                 break;
             case WebSocketMethodListen.Received:
                 ControlChat(sender.Buffer, session);
@@ -73,8 +73,7 @@ internal partial class LobbyWeb
 #pragma warning disable CA1031 // Do not catch general exception types
         try
         {
-            var str = Encoding.UTF8.GetString(data);
-            ChatMessage? chatMessage = JsonSerializer.Deserialize(str, typeInfo);
+            ChatMessage? chatMessage = JsonSerializer.Deserialize(data, typeInfo);
             if (chatMessage == null)
             {
                 session.SendClose(401, "No ChatMessage!");
@@ -98,13 +97,13 @@ internal partial class LobbyWeb
                 return;
             }
 
-            var ticket = ChatUserToWS.Keys.FirstOrDefault(x => x.Id == chatMessage.Sender);
+            var ticket = ChatUsers.Keys.FirstOrDefault(x => x.Id == chatMessage.Sender);
             if (ticket == null || string.IsNullOrEmpty(ticket.UserId))
             {
                 return;
             }
 
-            if (!ChatUserToWS.TryGetValue(ticket, out var webSocketStruct))
+            if (!ChatUsers.TryGetValue(ticket, out var webSocketStruct))
             {
                 // User isnt active, should we store it to send to receiver? [Currently not.]
                 return;

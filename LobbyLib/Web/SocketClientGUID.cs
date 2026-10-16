@@ -1,11 +1,13 @@
-﻿using LobbyLib.CustomTicket;
+﻿using EIV_LobbyData;
+using EIV_LobbyData.Socket;
+using LobbyLib.CustomMessageProcessor;
 using LobbyLib.Managers;
-using ModdableWebServer.Attributes;
-using ModdableWebServer.Helper;
 using ModdableWebServer;
+using ModdableWebServer.Attributes;
+using ModdableWebServer.Interfaces;
+using ModdableWebServer.Senders;
+using Serilog;
 using System.Text.Json;
-using EIV_JsonLib.Lobby;
-using LobbyLib.Modding;
 
 namespace LobbyLib.Web;
 
@@ -14,82 +16,75 @@ namespace LobbyLib.Web;
 /// </summary>
 internal partial class LobbyWeb
 {
-    public static Dictionary<string, WebSocketStruct> ClientUserToWS = [];
+    /// <summary>
+    /// Gets a ticket to session dictionary.
+    /// </summary>
+    public static Dictionary<TicketModel, IWSSession> ClientUsers { get; } = [];
 
-    [WS("/Socket/Client/{guid}")]
-    public static void SocketClient(WebSocketStruct socketStruct)
+    /// <summary>
+    /// <see cref="SocketClient(WebSocketSender)"/>.
+    /// </summary>
+    /// <param name="sender">Sender.</param>
+#pragma warning disable CA2243 // Attribute string literals should parse correctly
+    [WS("/Socket/Client/{guid}", WebSocketMethodListen.All)]
+#pragma warning restore CA2243 // Attribute string literals should parse correctly
+    public static void SocketClient(WebSocketSender sender)
     {
-        if (!socketStruct.Request.Headers.TryGetValue("authorization", out var ticket))
+        IWSSession session = (IWSSession)sender.Session;
+
+        if (!sender.Headers.TryGetValue("authorization", out var ticket))
         {
-            socketStruct.SendWebSocketClose(401, "Authorization is not found!");
+            session.SendClose(401, "Authorization is not found!");
             return;
         }
+
         var ticketstruct = TicketManager.GetTicket(ticket);
         if (ticketstruct == null)
         {
-            socketStruct.SendWebSocketClose(401, "wrong ticket!");
+            session.SendClose(401, "wrong ticket!");
             return;
         }
 
-        Console.WriteLine("websocket hit!");
+        Log.Information("websocket client hit!");
 
-        if (socketStruct.WSRequest != null)
+        switch (sender.CurrentMethod)
         {
-            ReadOnlySpan<byte> data = socketStruct.WSRequest.Value.buffer.Skip((int)socketStruct.WSRequest.Value.offset).Take((int)socketStruct.WSRequest.Value.size).ToArray();
-            ControlClient(data, socketStruct, ticketstruct.Value);
-        }
-        if (socketStruct.IsConnected)
-        {
-            ClientUserToWS.Add(ticketstruct.Value.UserId, socketStruct);
-        }
-        if (socketStruct.IsClosed)
-        {
-            ClientUserToWS.Remove(ticketstruct.Value.UserId);
-        }
-    }
-
-    public static void ControlClient(ReadOnlySpan<byte> data, WebSocketStruct socketStruct, TicketStruct ticket)
-    {
-        try
-        {
-            ClientSocketMessage? message = JsonSerializer.Deserialize<ClientSocketMessage>(data);
-            if (message == null)
+            case WebSocketMethodListen.Connected:
+                ClientUsers.Add(ticketstruct, session);
                 return;
-            if (GroupManager.Manage(data, socketStruct, ticket, message.Enum, message))
+            case WebSocketMethodListen.Disconnected:
+                ClientUsers.Remove(ticketstruct);
                 return;
-            if (FriendManager.Manage(socketStruct, ticket, message.Enum, message))
+            case WebSocketMethodListen.Received:
+                {
+                    if (!JsonSerializerConvert.TryGetTypeInfo<ClientMessage>(out var typeInfo))
+                    {
+                        return;
+                    }
+
+#pragma warning disable CA1031 // Do not catch general exception types
+                    try
+                    {
+                        ClientMessage? message = JsonSerializer.Deserialize(sender.Buffer, typeInfo);
+                        if (message == null)
+                        {
+                            return;
+                        }
+
+                        ProcessorStorage.Process(ticketstruct, session, message.Message);
+                    }
+                    catch (Exception)
+                    {
+                        session.SendClose(401, "Cannot Deserialize Message!");
+                    }
+#pragma warning restore CA1031 // Do not catch general exception types
+                }
+
                 return;
-            if (ItemActionManager.Manage(socketStruct, ticket, message.Enum, message))
+            case WebSocketMethodListen.Close:
                 return;
-
-
-            switch (message.Enum)
-            {
-                case ClientSocketEnum.MatchmakeCheck:
-                    QueueManager.AddQueue(socketStruct, ticket, message);
-                    break;
-                default:
-                    break;
-            }
-
-            foreach (var item in ModLoader.LobbyMods.Values)
-            {
-                item.ClientEvent(data, socketStruct, ticket, message.Enum, message);
-            }
+            default:
+                return;
         }
-        catch
-        {
-            socketStruct.SendWebSocketClose(401, "Cannot Deserialize to ClientSocketMessage");
-        }
-    }
-
-    public static void SendResponse<T>(WebSocketStruct socketStruct, T obj, ClientSocketEnum @enum = ClientSocketEnum.SocketResponse)
-    {
-        ClientSocketMessage clientSocketMessage = new()
-        {
-            Enum = @enum,
-            JsonMessage = JsonSerializer.Serialize(obj),
-        };
-        socketStruct.SendWebSocketText(JsonSerializer.Serialize(clientSocketMessage));
     }
 }

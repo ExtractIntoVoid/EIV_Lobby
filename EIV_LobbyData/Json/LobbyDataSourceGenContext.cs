@@ -25,6 +25,7 @@ namespace EIV_LobbyData.Json;
 [JsonSerializable(typeof(FriendSearchResponse))]
 [JsonSerializable(typeof(GameStarted))]
 [JsonSerializable(typeof(MatchmakeCheck))]
+[JsonSerializable(typeof(UserBlockListUpdate))]
 public partial class LobbyDataSourceGenContext : JsonSerializerContext
 {
 }

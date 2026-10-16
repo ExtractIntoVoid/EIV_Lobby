@@ -9,9 +9,9 @@ namespace LobbyLib;
 /// </summary>
 public static class PipeCommunication
 {
-    private static readonly Dictionary<int, NamedPipeServerStream> Servers = [];
+    private static readonly Dictionary<string, NamedPipeServerStream> Servers = [];
 
-    private static readonly ConcurrentDictionary<int, ConcurrentQueue<byte[]>> SenderQueue = new();
+    private static readonly ConcurrentDictionary<string, ConcurrentQueue<byte[]>> SenderQueue = new();
 
     /// <summary>
     /// Called when any data received.
@@ -21,61 +21,65 @@ public static class PipeCommunication
 #pragma warning restore CA1003 // Use generic event handler instances
 
     /// <summary>
-    /// Starts the communication via <paramref name="port"/>.
+    /// Gets the communication ids.
     /// </summary>
-    /// <param name="port">The server port.</param>
-    public static void StartServer(int port)
+    public static IReadOnlyCollection<string> CommIds => Servers.Keys;
+
+    /// <summary>
+    /// Starts the communication via <paramref name="commId"/>.
+    /// </summary>
+    /// <param name="commId">The server commId.</param>
+    public static void StartServer(string commId)
     {
-        string path = $"Lobby_{port}";
-        NamedPipeServerStream server = new(path, PipeDirection.InOut, NamedPipeServerStream.MaxAllowedServerInstances);
-        CoroutineFloatManager.StartCoroutine(Read(server), $"{nameof(PipeCommunication)}_{port}");
-        CoroutineFloatManager.StartCoroutine(Write(server, port), $"{nameof(PipeCommunication)}_{port}");
-        Servers[port] = server;
+        NamedPipeServerStream server = new(commId, PipeDirection.InOut, NamedPipeServerStream.MaxAllowedServerInstances);
+        CoroutineFloatManager.StartCoroutine(Read(server), $"{nameof(PipeCommunication)}_{commId}");
+        CoroutineFloatManager.StartCoroutine(Write(server, commId), $"{nameof(PipeCommunication)}_{commId}");
+        Servers[commId] = server;
     }
 
     /// <summary>
     /// Stops the communcation.
     /// </summary>
-    /// <param name="port">The server port.</param>
-    public static void StopServer(int port)
+    /// <param name="commId">The server commId.</param>
+    public static void StopServer(string commId)
     {
-        if (!Servers.Remove(port, out NamedPipeServerStream? server))
+        if (!Servers.Remove(commId, out NamedPipeServerStream? server))
         {
             return;
         }
 
         server.Disconnect();
         server.Dispose();
-        CoroutineFloatManager.KillCoroutineTag<float>($"{nameof(PipeCommunication)}_{port}");
+        CoroutineFloatManager.KillCoroutineTag<float>($"{nameof(PipeCommunication)}_{commId}");
     }
 
     /// <summary>
     /// Sends the data to the named pipe.
     /// </summary>
-    /// <param name="port">The port to send to.</param>
+    /// <param name="commId">The commId to send to.</param>
     /// <param name="data">The data.</param>
-    public static void Send(int port, ReadOnlySpan<byte> data)
+    public static void Send(string commId, ReadOnlySpan<byte> data)
     {
-        Send(port, data.ToArray());
+        Send(commId, data.ToArray());
     }
 
     /// <summary>
     /// Sends the data to the named pipe.
     /// </summary>
-    /// <param name="port">The port to send to.</param>
+    /// <param name="commId">The commId to send to.</param>
     /// <param name="data">The data.</param>
-    public static void Send(int port, byte[] data)
+    public static void Send(string commId, byte[] data)
     {
-        if (!Servers.ContainsKey(port))
+        if (!Servers.ContainsKey(commId))
         {
             return;
         }
 
         SenderQueue.AddOrUpdate(
-            port,
+            commId,
             (p) =>
             {
-                ConcurrentQueue<byte[]> q = SenderQueue.GetOrAdd(port, new ConcurrentQueue<byte[]>());
+                ConcurrentQueue<byte[]> q = SenderQueue.GetOrAdd(commId, new ConcurrentQueue<byte[]>());
                 q.Enqueue(data);
                 return q;
             },
@@ -106,7 +110,7 @@ public static class PipeCommunication
         }
     }
 
-    private static IEnumerator<float> Write(NamedPipeServerStream server, int port)
+    private static IEnumerator<float> Write(NamedPipeServerStream server, string commId)
     {
         if (server == null)
         {
@@ -115,7 +119,7 @@ public static class PipeCommunication
 
         while (true)
         {
-            if (server.IsConnected && server.CanWrite && SenderQueue.TryGetValue(port, out var queue) && queue.TryDequeue(out byte[]? queueBytes) && queueBytes != null)
+            if (server.IsConnected && server.CanWrite && SenderQueue.TryGetValue(commId, out var queue) && queue.TryDequeue(out byte[]? queueBytes) && queueBytes != null)
             {
                 server.Write(queueBytes);
                 server.Flush();

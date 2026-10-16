@@ -7,6 +7,7 @@ using EIV_Profile;
 using EIV_Profile.Json;
 using EIV_Profile.ProfileModules;
 using LobbyLib.Json;
+using System.Collections.ObjectModel;
 
 namespace LobbyLib.Managers;
 
@@ -15,6 +16,11 @@ namespace LobbyLib.Managers;
 /// </summary>
 public static class GameDataStorage
 {
+    /// <summary>
+    /// Gets the supported maps.
+    /// </summary>
+    public static readonly Collection<string> Maps = [];
+
     /// <summary>
     /// The available items.
     /// </summary>

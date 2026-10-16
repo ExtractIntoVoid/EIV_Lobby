@@ -4,7 +4,6 @@ using ModdableWebServer.Interfaces;
 using ModdableWebServer.Servers;
 using NetCoreServer;
 using Serilog;
-using System.Runtime.Intrinsics.X86;
 
 namespace LobbyLib.Web;
 

@@ -1,5 +1,6 @@
 ﻿using EIV_LobbyData;
 using LobbyLib.INI;
+using LobbyLib.Managers;
 using ModdableWebServer.Attributes;
 using ModdableWebServer.Senders;
 using System.Text.Json;
@@ -21,12 +22,12 @@ internal static partial class LobbyWeb
     {
         AboutResponse response = new(
             [],
-            new GameInfo(MainIni.Instance.Lobby.VersionRange, []),
+            new GameInfo(MainIni.Instance.Lobby.VersionRange, GameDataStorage.Maps),
             new LobbyInfo(
                 MainIni.Instance.Lobby.Name,
                 MainIni.Instance.Lobby.Description,
                 MainIni.Instance.Lobby.ReadLongDescription(),
-                ChatUserToWS.Count,
+                ChatUsers.Count,
                 MainIni.Instance.Lobby.MaxPlayers));
 
         if (!JsonSerializerConvert.TryGetTypeInfo<AboutResponse>(out var typeInfo))
