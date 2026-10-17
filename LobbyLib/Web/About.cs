@@ -22,7 +22,7 @@ internal static partial class LobbyWeb
     {
         AboutResponse response = new(
             [],
-            new GameInfo(MainIni.Instance.Lobby.VersionRange, GameDataStorage.Maps),
+            new GameInfo(MainIni.Instance.Lobby.VersionRange, PipeDataManager.Maps),
             new LobbyInfo(
                 MainIni.Instance.Lobby.Name,
                 MainIni.Instance.Lobby.Description,

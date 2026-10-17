@@ -1,29 +1,37 @@
 ﻿using EIV_Coroutines;
+using LobbyLib.Models;
+using Serilog;
 using System.Collections.Concurrent;
 using System.IO.Pipes;
+using System.Text;
 
 namespace LobbyLib;
+
+#pragma warning disable SA1600 // Elements should be documented
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
 /// <summary>
 /// Provides a communication via named pipe.
 /// </summary>
 public static class PipeCommunication
 {
-    private static readonly Dictionary<string, NamedPipeServerStream> Servers = [];
-
-    private static readonly ConcurrentDictionary<string, ConcurrentQueue<byte[]>> SenderQueue = new();
+    private static readonly ConcurrentDictionary<string, PipeServer> Servers = [];
 
     /// <summary>
     /// Called when any data received.
     /// </summary>
 #pragma warning disable CA1003 // Use generic event handler instances
-    public static event Action<byte[]>? OnReceived;
+    public static event Action<PipeServer, string?>? OnMessageReceived;
+
+    public static event Action? OnClientConnected;
+
+    public static event Action? OnClientDisconnected;
 #pragma warning restore CA1003 // Use generic event handler instances
 
     /// <summary>
     /// Gets the communication ids.
     /// </summary>
-    public static IReadOnlyCollection<string> CommIds => Servers.Keys;
+    public static IEnumerable<string> CommIds => Servers.Keys;
 
     /// <summary>
     /// Starts the communication via <paramref name="commId"/>.
@@ -32,9 +40,41 @@ public static class PipeCommunication
     public static void StartServer(string commId)
     {
         NamedPipeServerStream server = new(commId, PipeDirection.InOut, NamedPipeServerStream.MaxAllowedServerInstances);
-        CoroutineFloatManager.StartCoroutine(Read(server), $"{nameof(PipeCommunication)}_{commId}");
-        CoroutineFloatManager.StartCoroutine(Write(server, commId), $"{nameof(PipeCommunication)}_{commId}");
-        Servers[commId] = server;
+#pragma warning disable CA2000 // Dispose objects before losing scope
+        PipeServer pipeServer = new(
+            commId,
+            server,
+            new StreamReader(server, Encoding.UTF8),
+            new StreamWriter(server, Encoding.UTF8)
+            {
+                NewLine = "\n",
+                AutoFlush = false,
+            },
+            []);
+
+        Servers.TryAdd(commId, pipeServer);
+#pragma warning restore CA2000 // Dispose objects before losing scope
+
+        Thread waitForConnect = new(WaitForConnectThread)
+        {
+            IsBackground = true,
+            Name = $"WaitForConnectThread_{commId}",
+        };
+        waitForConnect.Start(commId);
+
+        Thread sendThread = new(SendMessageThread)
+        {
+            IsBackground = true,
+            Name = $"SendMessageThread_{commId}",
+        };
+        sendThread.Start(commId);
+
+        Thread readThread = new(ReadMessageThread)
+        {
+            IsBackground = true,
+            Name = $"ReadMessageThread_{commId}",
+        };
+        readThread.Start(commId);
     }
 
     /// <summary>
@@ -43,89 +83,116 @@ public static class PipeCommunication
     /// <param name="commId">The server commId.</param>
     public static void StopServer(string commId)
     {
-        if (!Servers.Remove(commId, out NamedPipeServerStream? server))
+        if (!Servers.TryRemove(commId, out PipeServer? server))
         {
             return;
         }
 
-        server.Disconnect();
-        server.Dispose();
-        CoroutineFloatManager.KillCoroutineTag<float>($"{nameof(PipeCommunication)}_{commId}");
+        server.Stream.Disconnect();
+        server.Stream.Dispose();
+
+        server.MessageQueue.Clear();
     }
 
-    /// <summary>
-    /// Sends the data to the named pipe.
-    /// </summary>
-    /// <param name="commId">The commId to send to.</param>
-    /// <param name="data">The data.</param>
-    public static void Send(string commId, ReadOnlySpan<byte> data)
+    private static void WaitForConnectThread(object? obj)
     {
-        Send(commId, data.ToArray());
-    }
-
-    /// <summary>
-    /// Sends the data to the named pipe.
-    /// </summary>
-    /// <param name="commId">The commId to send to.</param>
-    /// <param name="data">The data.</param>
-    public static void Send(string commId, byte[] data)
-    {
-        if (!Servers.ContainsKey(commId))
+        if (obj is not string serverId)
         {
             return;
         }
 
-        SenderQueue.AddOrUpdate(
-            commId,
-            (p) =>
+        try
+        {
+            if (Servers.TryGetValue(serverId, out var server) &&
+                server.Stream != null &&
+                !server.Stream.IsConnected)
             {
-                ConcurrentQueue<byte[]> q = SenderQueue.GetOrAdd(commId, new ConcurrentQueue<byte[]>());
-                q.Enqueue(data);
-                return q;
-            },
-            (p, q) =>
-            {
-                q.Enqueue(data);
-                return q;
-            });
+                server.Stream.WaitForConnection();
+            }
+        }
+        catch (Exception ex) when (ex is not IOException)
+        {
+            Log.Error("WaitForConnectThread error! {ex}", ex);
+        }
+
+        Log.Verbose("Pipe {id} connected from unity!", serverId);
     }
 
-    private static IEnumerator<float> Read(NamedPipeServerStream server)
+    private static void SendMessageThread(object? obj)
     {
-        if (server == null)
+        if (obj is not string serverId)
         {
-            yield break;
+            return;
         }
 
-        while (true)
+        while (Servers.TryGetValue(serverId, out var server) &&
+            server.Stream != null &&
+            server.Writer != null)
         {
-            if (server.IsConnected && server.CanRead)
+            if (!server.Stream.IsConnected)
             {
-                Span<byte> bytes = new(new byte[server.InBufferSize]);
-                int read = server.Read(bytes);
-                OnReceived?.Invoke(bytes[..read].ToArray());
+                continue;
             }
 
-            yield return 0;
+            if (!server.MessageQueue.TryDequeue(out string? msg))
+            {
+                Thread.Sleep(5);
+                continue;
+            }
+
+            try
+            {
+                server.Writer.WriteLine(msg);
+                server.Writer.Flush();
+            }
+            catch (Exception ex) when (ex is not ObjectDisposedException)
+            {
+                Log.Error("Pipe write thrown error! {ex}", ex);
+            }
         }
+
+        Log.Verbose("Pipe {id} sending finished!", serverId);
     }
 
-    private static IEnumerator<float> Write(NamedPipeServerStream server, string commId)
+    private static void ReadMessageThread(object? obj)
     {
-        if (server == null)
+        if (obj is not string serverId)
         {
-            yield break;
+            return;
         }
 
-        while (true)
+        while (Servers.TryGetValue(serverId, out var server) &&
+            server.Stream != null &&
+            server.Reader != null)
         {
-            if (server.IsConnected && server.CanWrite && SenderQueue.TryGetValue(commId, out var queue) && queue.TryDequeue(out byte[]? queueBytes) && queueBytes != null)
+            try
             {
-                server.Write(queueBytes);
-                server.Flush();
-            }
+                if (!server.Stream.IsConnected)
+                {
+                    continue;
+                }
 
-            yield return 0;
+                string? line = server.Reader.ReadLine();
+
+                if (string.IsNullOrEmpty(line))
+                {
+                    continue;
+                }
+
+                CoroutineFloatManager.CallDelayed(
+                         0.1f,
+                         () =>
+                         {
+                             OnMessageReceived?.Invoke(server, line);
+                         },
+                         nameof(PipeCommunication));
+            }
+            catch (Exception ex) when (ex is not ObjectDisposedException)
+            {
+                Log.Error("Pipe write thrown error! {ex}", ex);
+            }
         }
+
+        Log.Verbose("Pipe {id} reading finished!", serverId);
     }
 }

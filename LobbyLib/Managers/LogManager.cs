@@ -35,6 +35,7 @@ public static class LogManager
     /// </summary>
     public static void Create()
     {
+        AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
         Create(GetConfiguration());
     }
 
@@ -80,5 +81,10 @@ public static class LogManager
         Logger.Information("--- STOP -----");
         Log.CloseAndFlush();
         Logger = null;
+    }
+
+    private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+    {
+        Log.Error("Unhandled exception! {sender} {obj} {isterm}", sender, e.ExceptionObject, e.IsTerminating);
     }
 }

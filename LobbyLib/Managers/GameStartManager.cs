@@ -1,4 +1,5 @@
 ﻿using LobbyLib.INI;
+using Serilog;
 using System.Diagnostics;
 
 namespace LobbyLib.Managers;
@@ -8,7 +9,7 @@ namespace LobbyLib.Managers;
 
 public static class GameStartManager
 {
-    private static readonly List<Process> GameServerProcesses = [];
+    private static readonly Dictionary<Process, string> GameServerProcesses = [];
 
     public static void ControlInit()
     {
@@ -32,39 +33,43 @@ public static class GameStartManager
         StartGame(serverPath, $"--map={map}");
     }
 
-    public static bool StartGame(string path, string args)
+    public static void StartGame(string path, string args)
     {
-        Process.EnterDebugMode();
-
         string pipeComId = $"Lobby_{Guid.NewGuid()}";
         PipeCommunication.StartServer(pipeComId);
 
-        args += "--np=" + pipeComId;
+        args += " --np=" + pipeComId;
 
-        var proc = Process.Start(new ProcessStartInfo()
+        Process process = new()
         {
-            FileName = path,
-            Arguments = args,
-        });
+            StartInfo = new ProcessStartInfo()
+            {
+                FileName = path,
+                Arguments = args,
+                UseShellExecute = !MainIni.Instance.GameServer.Silent && MainIni.Instance.GameServer.NewWindow,
+                RedirectStandardError = MainIni.Instance.GameServer.Silent,
+                RedirectStandardInput = MainIni.Instance.GameServer.Silent,
+                RedirectStandardOutput = MainIni.Instance.GameServer.Silent,
+            },
+        };
 
-        if (proc == null)
-        {
-            return false;
-        }
+        GameServerProcesses.Add(process, pipeComId);
 
-        GameServerProcesses.Add(proc);
-        return true;
+        process.Start();
     }
 
     public static void CheckProcesss()
     {
+        Log.Information("Check!");
+
         List<Process> toRemove = [];
 
         foreach (var process in GameServerProcesses)
         {
-            if (process.HasExited)
+            if (process.Key.HasExited)
             {
-                toRemove.Add(process);
+                toRemove.Add(process.Key);
+                PipeCommunication.StopServer(process.Value);
             }
         }
 
@@ -78,9 +83,10 @@ public static class GameStartManager
     {
         foreach (var item in GameServerProcesses)
         {
-            item.Kill();
-            item.Close();
-            item.Dispose();
+            item.Key.Kill();
+            item.Key.Close();
+            item.Key.Dispose();
+            PipeCommunication.StopServer(item.Value);
         }
 
         GameServerProcesses.Clear();

@@ -14,6 +14,7 @@ public static class MainControl
 {
     private static CoroutineHandle? queueRunner;
     private static CoroutineHandle? processRunner;
+    private static CoroutineHandle? checkProcesssHandle;
     private static bool isAlreadyQuited;
 
     /// <summary>
@@ -30,6 +31,7 @@ public static class MainControl
         LogManager.Create();
 
         GameDataStorage.Init();
+        PipeDataManager.Init();
 
         // Init custom coroutine. not doing much but we need later on.
         CoroutineFloatManager.HasAnyCoroutines();
@@ -50,7 +52,10 @@ public static class MainControl
 
         Database.Create();
 
-        // GameStartManager.ControlInit();
+        GameStartManager.ControlInit();
+
+        checkProcesssHandle = CoroutineFloatManager.CallPeriodically(TimeSpan.FromSeconds(5), GameStartManager.CheckProcesss);
+
         // QueueRunner = CoroutineFloatManager.CallPeriodically(TimeSpan.FromSeconds(100), QueueManager.CheckQueue);
         // ProcessRunner = CoroutineFloatManager.CallPeriodically(TimeSpan.FromSeconds(100), GameStartManager.CheckProcesss);
         return true;
@@ -78,6 +83,13 @@ public static class MainControl
         }
 
         processRunner = null;
+
+        if (checkProcesssHandle != null)
+        {
+            CoroutineFloatManager.KillCoroutine(checkProcesssHandle.Value);
+        }
+
+        checkProcesssHandle = null;
 
         ServerManager.Stop();
         isAlreadyQuited = true;

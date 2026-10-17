@@ -1,4 +1,5 @@
-﻿using EIV_LobbyData.Socket;
+﻿using EIV_LobbyData.Pipe;
+using EIV_LobbyData.Socket;
 using EIV_LobbyData.Socket.CustomMessages;
 using System.Text.Json.Serialization;
 
@@ -26,6 +27,12 @@ namespace EIV_LobbyData.Json;
 [JsonSerializable(typeof(GameStarted))]
 [JsonSerializable(typeof(MatchmakeCheck))]
 [JsonSerializable(typeof(UserBlockListUpdate))]
+
+[JsonSerializable(typeof(IPipeMessage))]
+
+[JsonSerializable(typeof(Command))]
+[JsonSerializable(typeof(KeepAlive))]
+[JsonSerializable(typeof(MapSync))]
 public partial class LobbyDataSourceGenContext : JsonSerializerContext
 {
 }

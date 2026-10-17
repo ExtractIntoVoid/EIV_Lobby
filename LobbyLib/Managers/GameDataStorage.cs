@@ -17,11 +17,6 @@ namespace LobbyLib.Managers;
 public static class GameDataStorage
 {
     /// <summary>
-    /// Gets the supported maps.
-    /// </summary>
-    public static readonly Collection<string> Maps = [];
-
-    /// <summary>
     /// The available items.
     /// </summary>
     public static readonly Dictionary<string, CoreItem> Items = [];

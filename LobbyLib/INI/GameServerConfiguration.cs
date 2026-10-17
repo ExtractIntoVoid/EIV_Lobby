@@ -14,4 +14,14 @@ public class GameServerConfiguration
     /// Gets or sets the server exe path.
     /// </summary>
     public string Path { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether start the server as silent mod (Backgroup, No window).
+    /// </summary>
+    public bool Silent { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether start the server as a new window.
+    /// </summary>
+    public bool NewWindow { get; set; }
 }

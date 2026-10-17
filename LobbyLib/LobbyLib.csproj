@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="EIV_Coroutines" Version="2.3.0" />
+    <PackageReference Include="EIV_Coroutines" Version="2.4.0" />
     <PackageReference Include="EIV_DataPack" Version="1.1.0" />
     <PackageReference Include="EIV_Pack" Version="2.3.2" />
     <PackageReference Include="ini-parser-netstandard" Version="2.5.3" />
