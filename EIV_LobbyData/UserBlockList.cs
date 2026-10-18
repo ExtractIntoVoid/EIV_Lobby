@@ -8,11 +8,18 @@ namespace EIV_LobbyData;
 /// <param name="FriendInviteBlocks">The friend invites to be blocked.</param>
 /// <param name="GroupInviteBlocks">The group invites to be blocked.</param>
 /// <param name="ChatBlocks">The ids to block chat communication.</param>
-/// <param name="BlockAllInvite">Whenever to block all invite.</param>
-/// <param name="BlockAllChat">Whenever to block all chat communication.</param>
 public record class UserBlockList(
     Collection<Guid> FriendInviteBlocks,
     Collection<Guid> GroupInviteBlocks,
-    Collection<Guid> ChatBlocks,
-    bool BlockAllInvite,
-    bool BlockAllChat);
+    Collection<Guid> ChatBlocks)
+{
+    /// <summary>
+    /// Gets or sets a value indicating whether block all invite.
+    /// </summary>
+    public bool BlockAllInvite { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether block all chat communication.
+    /// </summary>
+    public bool BlockAllChat { get; set; }
+}

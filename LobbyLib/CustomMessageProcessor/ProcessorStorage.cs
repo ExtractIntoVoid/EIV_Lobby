@@ -1,6 +1,7 @@
 ﻿using EIV_LobbyData;
 using EIV_LobbyData.Socket.CustomMessages;
 using ModdableWebServer.Interfaces;
+using Serilog;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 
@@ -17,6 +18,10 @@ public static class ProcessorStorage
     public static Collection<IProcessor> Processors { get; } =
     [
         new FriendActionProcessor(),
+        new FriendAddPlatformProcessor(),
+        new FriendSearchProcessor(),
+        new MatchmakeCheckProcessor(),
+        new UserBlockListUpdateProcessor(),
     ];
 
     /// <summary>
@@ -31,8 +36,10 @@ public static class ProcessorStorage
         {
             if (item.Process(ticket, session, message))
             {
-                break;
+                return;
             }
         }
+
+        Log.Warning("Cannot process {msg}!", message);
     }
 }

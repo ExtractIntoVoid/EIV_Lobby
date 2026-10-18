@@ -1,5 +1,6 @@
 ﻿using EIV_LobbyData;
 using LobbyLib.Models;
+using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 
 namespace LobbyLib.Managers;
@@ -23,6 +24,15 @@ public static class UserManager
     }
 
     /// <summary>
+    /// Saves user.
+    /// </summary>
+    /// <param name="user">The user.</param>
+    public static void SaveUser(UserData user)
+    {
+        MainControl.Database.SaveUserData(user);
+    }
+
+    /// <summary>
     /// Gets the user from id.
     /// </summary>
     /// <param name="id">The id.</param>
@@ -30,6 +40,45 @@ public static class UserManager
     public static UserData? GetUser(Guid id)
     {
         return MainControl.Database.GetUserData(id);
+    }
+
+    /// <summary>
+    /// Gets the users.
+    /// </summary>
+    /// <returns>The users.</returns>
+    public static Collection<UserData> GetUsers()
+    {
+        return MainControl.Database.GetUserDatas();
+    }
+
+    /// <summary>
+    /// Gets the users.
+    /// </summary>
+    /// <param name="predicate">The selected user.</param>
+    /// <returns>The users.</returns>
+    public static Collection<UserData> GetUsers(Func<UserData, bool> predicate)
+    {
+        return new([..GetUsers().Where(predicate)]);
+    }
+
+    /// <summary>
+    /// Gets the users.
+    /// </summary>
+    /// <param name="predicate">The selected user.</param>
+    /// <returns>The users.</returns>
+    public static IEnumerable<UserData> GetUsersWhere(Func<UserData, bool> predicate)
+    {
+        return GetUsers().Where(predicate);
+    }
+
+    /// <summary>
+    /// Gets the users.
+    /// </summary>
+    /// <param name="predicate">The selected user.</param>
+    /// <returns>The users.</returns>
+    public static Collection<Guid> GetUsersGuid(Func<UserData, bool> predicate)
+    {
+        return new([.. GetUsers().Where(predicate).Select(x => x.Id)]);
     }
 
     public static ResultCode SendFriendRequest(Guid id, Guid friendId)
@@ -57,6 +106,9 @@ public static class UserManager
         user.FriendRequests.Add(friendId);
         friend.FriendRequests.Add(id);
 
+        SaveUser(user);
+        SaveUser(friend);
+
         return ResultCode.Success;
     }
 
@@ -79,6 +131,9 @@ public static class UserManager
 
         user.FriendsIds.Remove(friendId);
         friend.FriendsIds.Remove(friendId);
+
+        SaveUser(user);
+        SaveUser(friend);
 
         return ResultCode.Success;
     }
@@ -113,6 +168,9 @@ public static class UserManager
         user.FriendsIds.Add(friendId);
         friend.FriendsIds.Add(friendId);
 
+        SaveUser(user);
+        SaveUser(friend);
+
         return ResultCode.Success;
     }
 
@@ -130,6 +188,9 @@ public static class UserManager
 
         user.FriendsIds.Remove(friendId);
         friend.FriendsIds.Remove(friendId);
+
+        SaveUser(user);
+        SaveUser(friend);
 
         return ResultCode.Success;
     }
