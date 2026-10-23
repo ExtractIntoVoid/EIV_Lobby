@@ -31,5 +31,5 @@ public class UserData : CoreUserModel
     /// <summary>
     /// Gets or sets the block list.
     /// </summary>
-    public UserBlockList BlockList { get; set; } = new([], [], [], false, false);
+    public UserBlockList BlockList { get; set; } = new([], [], []);
 }

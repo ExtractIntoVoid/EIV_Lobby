@@ -11,7 +11,7 @@ namespace LobbyLib.Managers;
 
 public static class PipeDataManager
 {
-    public static Collection<string> Maps { get; } = [];
+    private static Collection<string> Maps { get; } = [];
 
     public static void Init()
     {
@@ -55,10 +55,18 @@ public static class PipeDataManager
                     return;
                 case MapSync mapSync:
                     {
-                        Maps.Clear();
-                        foreach (var item in mapSync.Maps.Select(x => x.Name))
+                        foreach (var item in Maps)
                         {
-                            Maps.Add(item);
+                            GameDataStorage.RemoveMap(item);
+                        }
+
+                        Maps.Clear();
+
+                        foreach (var item in mapSync.Maps)
+                        {
+                            Maps.Add(item.Name);
+                            GameDataStorage.MapsNames.Add(item.Name);
+                            GameDataStorage.Maps.Add(item);
                         }
                     }
 

@@ -3,6 +3,7 @@ using EIV_Items;
 using EIV_Items.Core;
 using EIV_Items.Json;
 using EIV_LobbyData.Json;
+using EIV_LobbyData.Pipe;
 using EIV_Profile;
 using EIV_Profile.Json;
 using EIV_Profile.ProfileModules;
@@ -16,6 +17,16 @@ namespace LobbyLib.Managers;
 /// </summary>
 public static class GameDataStorage
 {
+    /// <summary>
+    /// The available map names.
+    /// </summary>
+    public static readonly Collection<string> MapsNames = [];
+
+    /// <summary>
+    /// The available maps.
+    /// </summary>
+    public static readonly Collection<MapData> Maps = [];
+
     /// <summary>
     /// The available items.
     /// </summary>
@@ -42,6 +53,11 @@ public static class GameDataStorage
     public static readonly Dictionary<string, List<IProfileModule>> OriginToModules = [];
 
     /// <summary>
+    /// Gets or sets the current players.
+    /// </summary>
+    public static int CurrentPlayers { get; set; }
+
+    /// <summary>
     /// Init formatters/serializers.
     /// </summary>
     public static void Init()
@@ -59,6 +75,20 @@ public static class GameDataStorage
     /// </summary>
     public static void Load()
     {
+    }
+
+    /// <summary>
+    /// Removes map from internal maps.
+    /// </summary>
+    /// <param name="map">The map to remove.</param>
+    public static void RemoveMap(string map)
+    {
+        MapsNames.Remove(map);
+        var mapData = Maps.FirstOrDefault(x => x.Name == map);
+        if (mapData != null)
+        {
+            Maps.Remove(mapData);
+        }
     }
 
     /// <summary>

@@ -8,4 +8,5 @@ namespace EIV_LobbyData;
 /// <param name="Downloadables">The downloadables for the game.</param>
 /// <param name="Game">The game information.</param>
 /// <param name="Lobby">The lobby information.</param>
-public record class AboutResponse(Collection<DownloadInfo> Downloadables, GameInfo Game, LobbyInfo Lobby);
+/// <param name="Lobbies">The sub lobbies.</param>
+public record class AboutResponse(Collection<DownloadInfo> Downloadables, GameInfo Game, LobbyInfo Lobby, Collection<SubLobby> Lobbies);

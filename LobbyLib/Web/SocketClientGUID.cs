@@ -50,9 +50,11 @@ internal partial class LobbyWeb
         switch (sender.CurrentMethod)
         {
             case WebSocketMethodListen.Connected:
+                GameDataStorage.CurrentPlayers++;
                 ClientUsers.Add(ticketstruct, session);
                 return;
             case WebSocketMethodListen.Disconnected:
+                GameDataStorage.CurrentPlayers--;
                 ClientUsers.Remove(ticketstruct);
                 return;
             case WebSocketMethodListen.Received:

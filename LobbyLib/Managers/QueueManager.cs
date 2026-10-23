@@ -1,104 +1,116 @@
-﻿using EIV_JsonLib.Lobby;
-using LobbyLib.CustomTicket;
+﻿using EIV_LobbyData.Socket.CustomMessages;
 using LobbyLib.Web;
-using ModdableWebServer;
-using System.Text.Json;
+using System.Diagnostics.CodeAnalysis;
 
 namespace LobbyLib.Managers;
 
-public struct MapQueue
+/// <summary>
+/// Provides a manager for map queue.
+/// </summary>
+public static class QueueManager
 {
-    public List<string> UserIds;
-    public string Map;
-}
+    private static readonly List<Queue> StartedQueues = [];
 
-public struct Map
-{
-    public string Name;
-    public int MinPlayer;
-    public int MaxPlayer;
-}
+    private static List<Queue> Queues { get; } = [];
 
-public class QueueManager
-{
-    public static List<MapQueue> MapQueues { get; set; } = [];
-    public static List<Map> Maps { get; set; } = [];
-
-    public static void AddQueue(WebSocketStruct socketStruct, TicketStruct ticket, ClientSocketMessage message)
+    /// <summary>
+    /// Add user to the queue.
+    /// </summary>
+    /// <param name="userId">Id of the user to add.</param>
+    /// <param name="map">The map to check.</param>
+    public static void AddQueue(string userId, string map)
     {
-        MatchmakeCheck? matchmakeCheck = JsonSerializer.Deserialize<MatchmakeCheck>(message.JsonMessage);
-        if (matchmakeCheck == null)
-            return;
-        var mapqueue = MapQueues.FirstOrDefault(x => x.Map == matchmakeCheck.Map);
+        var mapqueue = Queues.FirstOrDefault(x => x.Map == map);
         if (string.IsNullOrEmpty(mapqueue.Map))
-            MapQueues.Add(new MapQueue()
+        {
+            Queues.Add(new Queue()
             {
-                Map = matchmakeCheck.Map,
+                Map = map,
                 UserIds =
                 [
-                    ticket.UserId
-                ]
+                    userId
+                ],
             });
-        else if (!mapqueue.UserIds.Contains(ticket.UserId))
-        {
-            mapqueue.UserIds.Add(ticket.UserId);
         }
-        ClientSocketResponse response = new()
+        else if (!mapqueue.UserIds.Contains(userId))
         {
-            IsSuccess = true,
-            ErrorCode = 0,
-            Message = "You have been added to Queue!",
-        };
-        LobbyWeb.SendResponse(socketStruct, response);
+            mapqueue.UserIds.Add(userId);
+        }
+
         CheckQueue();
     }
 
+    /// <summary>
+    /// Remove the user from the queue.
+    /// </summary>
+    /// <param name="userId">The user to remove.</param>
     public static void RemoveQueue(string userId)
     {
-        var queue = MapQueues.FirstOrDefault(x=>x.UserIds.Contains(userId));
+        var queue = Queues.FirstOrDefault(x => x.UserIds.Contains(userId));
+
         // no queue.
         if (queue.UserIds.Count == 0)
+        {
             return;
+        }
+
         queue.UserIds.Remove(userId);
         if (queue.UserIds.Count == 0)
         {
-            MapQueues.Remove(queue);
+            Queues.Remove(queue);
         }
     }
 
-    // And add logic for actually starting the game and the server respectively.
+    /// <summary>
+    /// Checks the queue and starts the game.
+    /// </summary>
     public static void CheckQueue()
     {
-        if (MapQueues.Count == 0)
-            return;
-
-        if (Maps.Count == 0)
-            return;
-
-        foreach (var mapqueue in MapQueues)
+        if (Queues.Count == 0)
         {
-            var maps = Maps.FindAll(x=>x.Name == mapqueue.Map && x.MinPlayer <= mapqueue.UserIds.Count && x.MaxPlayer > mapqueue.UserIds.Count);
+            return;
+        }
+
+        if (GameDataStorage.Maps.Count == 0)
+        {
+            return;
+        }
+
+        StartedQueues.Clear();
+
+        foreach (Queue queue in Queues)
+        {
+            var maps = GameDataStorage.Maps.Where(x => x.Name == queue.Map && x.MinPlayers <= queue.UserIds.Count && x.MaxPlayers > queue.UserIds.Count);
             foreach (var map in maps)
             {
-                //  start the server.
-                var (ip, port) = GameStartManager.StartGameServer(map.Name);
-                if (port == 0)
-                    continue;
-                foreach (var userId in mapqueue.UserIds)
-                {
-                    if (!LobbyWeb.ClientUserToWS.TryGetValue(userId, out var webSocketStruct))
-                    {
-                        return;
-                    }
-                    LobbyWeb.SendResponse(webSocketStruct, new GameStart()
-                    { 
-                        Address = ip,
-                        Port = port
-                    }, ClientSocketEnum.GameStart);
-                }
+                GameStartManager.StartGameServer(map.Name);
 
+                StartedQueues.Add(queue);
+
+                foreach (var userId in queue.UserIds)
+                {
+                    var clientUser = LobbyWeb.ClientUsers.FirstOrDefault(x => x.Key.UserId == userId);
+                    if (clientUser.Key.UserId != userId)
+                    {
+                        continue;
+                    }
+
+                    // TODO: Send connection .
+                }
             }
         }
+
+        foreach (Queue queue in StartedQueues)
+        {
+            Queues.Remove(queue);
+        }
+
+        StartedQueues.Clear();
     }
 
+    private struct Queue
+    {
+        public List<string> UserIds;
+        public string Map;
+    }
 }

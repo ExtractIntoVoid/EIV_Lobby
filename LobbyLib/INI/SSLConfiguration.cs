@@ -28,5 +28,5 @@ public class SSLConfiguration
     /// <summary>
     /// Gets or sets a value indicating whether verify certificate.
     /// </summary>
-    public bool VerifyCertificate { get; set; }
+    public bool VerifyCertificate { get; set; } = true;
 }

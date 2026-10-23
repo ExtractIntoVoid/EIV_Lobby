@@ -9,13 +9,11 @@
   <ItemGroup>
     <Compile Remove="Managers\GroupManager.cs" />
     <Compile Remove="Managers\ItemActionManager.cs" />
-    <Compile Remove="Managers\QueueManager.cs" />
   </ItemGroup>
 
   <ItemGroup>
     <None Include="Managers\GroupManager.cs" />
     <None Include="Managers\ItemActionManager.cs" />
-    <None Include="Managers\QueueManager.cs" />
   </ItemGroup>
 
   <ItemGroup>

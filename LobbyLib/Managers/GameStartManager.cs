@@ -60,8 +60,6 @@ public static class GameStartManager
 
     public static void CheckProcesss()
     {
-        Log.Information("Check!");
-
         List<Process> toRemove = [];
 
         foreach (var process in GameServerProcesses)

@@ -22,13 +22,14 @@ internal static partial class LobbyWeb
     {
         AboutResponse response = new(
             [],
-            new GameInfo(MainIni.Instance.Lobby.VersionRange, PipeDataManager.Maps),
+            new GameInfo(MainIni.Instance.Lobby.VersionRange, GameDataStorage.MapsNames),
             new LobbyInfo(
                 MainIni.Instance.Lobby.Name,
                 MainIni.Instance.Lobby.Description,
                 MainIni.Instance.Lobby.ReadLongDescription(),
-                ChatUsers.Count,
-                MainIni.Instance.Lobby.MaxPlayers));
+                GameDataStorage.CurrentPlayers,
+                MainIni.Instance.Lobby.MaxPlayers),
+            []);
 
         if (!JsonSerializerConvert.TryGetTypeInfo<AboutResponse>(out var typeInfo))
         {

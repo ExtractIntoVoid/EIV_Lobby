@@ -58,4 +58,9 @@ public class MainIni
     /// Gets or sets the game server configuration.
     /// </summary>
     public GameServerConfiguration GameServer { get; set; } = new();
+
+    /// <summary>
+    /// Gets or sets the server to server configuration.
+    /// </summary>
+    public Server2ServerConfiguration Server2Server { get; set; } = new();
 }

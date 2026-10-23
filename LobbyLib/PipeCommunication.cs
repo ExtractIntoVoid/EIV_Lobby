@@ -15,17 +15,16 @@ namespace LobbyLib;
 /// </summary>
 public static class PipeCommunication
 {
-    private static readonly ConcurrentDictionary<string, PipeServer> Servers = [];
+    /// <summary>
+    /// The pipe servers.
+    /// </summary>
+    public static readonly ConcurrentDictionary<string, PipeServer> Servers = [];
 
     /// <summary>
     /// Called when any data received.
     /// </summary>
 #pragma warning disable CA1003 // Use generic event handler instances
     public static event Action<PipeServer, string?>? OnMessageReceived;
-
-    public static event Action? OnClientConnected;
-
-    public static event Action? OnClientDisconnected;
 #pragma warning restore CA1003 // Use generic event handler instances
 
     /// <summary>

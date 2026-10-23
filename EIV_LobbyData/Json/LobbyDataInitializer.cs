@@ -1,5 +1,6 @@
 ﻿using EIV_LobbyData.Pipe;
 using EIV_LobbyData.Socket.CustomMessages;
+using EIV_LobbyData.Socket.S2SMessages;
 
 namespace EIV_LobbyData.Json;
 
@@ -19,11 +20,17 @@ public static class LobbyDataInitializer
     public static CustomPolymorphismRegistry<IPipeMessage> IPipeMessagePolymorphismRegistry { get; } = new() { Dicriminator = "Type" };
 
     /// <summary>
+    /// Gets the <see cref="IS2SMessage"/> polymorphism registry.
+    /// </summary>
+    public static CustomPolymorphismRegistry<IS2SMessage> IS2SMessagePolymorphismRegistry { get; } = new() { Dicriminator = "Type" };
+
+    /// <summary>
     /// Initialize core polymorphisms and resolvers.
     /// </summary>
     public static void Initialize()
     {
         JsonSerializerConvert.Resolvers.Add(LobbyDataSourceGenContext.Default);
+
         ICustomMessagePolymorphismRegistry.Register<MatchmakeCheck>(nameof(MatchmakeCheck));
         ICustomMessagePolymorphismRegistry.Register<GameStarted>(nameof(GameStarted));
         ICustomMessagePolymorphismRegistry.Register<FriendAction>(nameof(FriendAction));
@@ -39,5 +46,10 @@ public static class LobbyDataInitializer
         IPipeMessagePolymorphismRegistry.Register<MapSync>(nameof(MapSync));
 
         JsonSerializerConvert.Polymorphisms.Add(IPipeMessagePolymorphismRegistry);
+
+        IS2SMessagePolymorphismRegistry.Register<SyncConnected>(nameof(SyncConnected));
+        IS2SMessagePolymorphismRegistry.Register<SyncPlayerCount>(nameof(SyncPlayerCount));
+
+        JsonSerializerConvert.Polymorphisms.Add(IS2SMessagePolymorphismRegistry);
     }
 }
